@@ -1,0 +1,114 @@
+# =====================================================
+# CONFIGURACIÓN DE LA APLICACIÓN SPRING BOOT
+# =====================================================
+# Este archivo contiene la configuración principal de la aplicación
+# incluyendo base de datos, JPA, Flyway, CORS y Swagger
+
+spring:
+  # =====================================================
+  # CONFIGURACIÓN DE BASE DE DATOS
+  # =====================================================
+  datasource:
+    # URL de conexión a MySQL
+    # - useSSL=false: Deshabilitar SSL para desarrollo
+    # - serverTimezone=UTC: Usar zona horaria UTC
+    # - allowPublicKeyRetrieval=true: Permitir recuperación de clave pública
+    url: jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: TnSf2024@.@
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  # =====================================================
+  # CONFIGURACIÓN JPA/HIBERNATE
+  # =====================================================
+  jpa:
+    hibernate:
+      # update: Actualizar esquema automáticamente
+      # none: No modificar esquema (para producción)
+      ddl-auto: update
+    # Mostrar SQL en logs para debugging
+    show-sql: true
+    properties:
+      hibernate:
+        # Formatear SQL para mejor legibilidad en logs
+        format_sql: true
+        
+  # =====================================================
+  # CONFIGURACIÓN FLYWAY (MIGRACIONES)
+  # =====================================================
+  flyway:
+    # Configuración específica para Flyway
+    url: jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    user: root
+    password: TnSf2024@.@
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # Deshabilitado temporalmente para evitar conflictos con Hibernate
+    enabled: false
+    # Ubicación de los archivos de migración
+    locations: classpath:db/migration
+    # Crear línea base si no existe
+    baseline-on-migrate: true
+    
+  # =====================================================
+  # CONFIGURACIÓN CORS
+  # =====================================================
+  web:
+    cors:
+      # Permitir todos los orígenes (configuración general)
+      # La configuración específica está en CorsConfig.java
+      allowed-origins: "*"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS,HEAD,TRACE,CONNECT"
+      allowed-headers: "*"
+      allow-credentials: true
+      max-age: 3600
+
+# =====================================================
+# PERFIL MYSQL (CONFIGURACIÓN ESPECÍFICA)
+# =====================================================
+---
+spring:
+  config:
+    activate:
+      on-profile: mysql
+  # Configuración específica para MySQL en producción
+  datasource:
+    url: jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: TnSf2024@.@
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  jpa:
+    hibernate:
+      # none: No modificar esquema en producción
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        
+  flyway:
+    url: jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    user: root
+    password: TnSf2024@.@
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    enabled: false
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+# =====================================================
+# CONFIGURACIÓN DEL SERVIDOR
+# =====================================================
+server:
+  # Puerto donde se ejecutará la aplicación
+  port: 8080
+
+# =====================================================
+# CONFIGURACIÓN SWAGGER/OPENAPI
+# =====================================================
+springdoc:
+  # Ruta para la documentación JSON de la API
+  api-docs:
+    path: /api-docs
+  # Ruta para la interfaz web de Swagger
+  swagger-ui:
+    path: /swagger-ui.html 
