@@ -52,15 +52,8 @@ spring:
   # =====================================================
   # CONFIGURACIÓN CORS
   # =====================================================
-  web:
-    cors:
-      # Permitir todos los orígenes (configuración general)
-      # La configuración específica está en CorsConfig.java
-      allowed-origins: "*"
-      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS,HEAD,TRACE,CONNECT"
-      allowed-headers: "*"
-      allow-credentials: true
-      max-age: 3600
+  # La configuración de CORS está manejada en CorsConfig.java
+  # para evitar conflictos y tener un control más granular
 
 # =====================================================
 # PERFIL MYSQL (CONFIGURACIÓN ESPECÍFICA)

@@ -92,6 +92,7 @@ C:\Users\nando\Desktop\consultoria_it\consultoria_back\src\main\java\com\codethi
 C:\Users\nando\Desktop\consultoria_it\consultoria_back\src\main\java\com\codethics\consultoria\dto\AnalyticsDTO.java
 C:\Users\nando\Desktop\consultoria_it\consultoria_back\src\main\java\com\codethics\consultoria\domain\BudgetItem.java
 C:\Users\nando\Desktop\consultoria_it\consultoria_back\src\main\java\com\codethics\consultoria\api\BudgetItemController.java
+C:\Users\nando\Desktop\consultoria_it\consultoria_back\src\main\java\com\codethics\consultoria\infrastructure\CorsFilter.java
 C:\Users\nando\Desktop\consultoria_it\consultoria_back\src\main\java\com\codethics\consultoria\api\InvoiceItemController.java
 C:\Users\nando\Desktop\consultoria_it\consultoria_back\src\main\java\com\codethics\consultoria\domain\ProjectTaskRepository.java
 C:\Users\nando\Desktop\consultoria_it\consultoria_back\src\main\java\com\codethics\consultoria\dto\PermissionDTO.java

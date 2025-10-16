@@ -23,7 +23,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "http://localhost:3000")
 @Tag(name = "Admin", description = "API para administradores del sistema")
 public class AdminController {
 
@@ -75,7 +74,7 @@ public class AdminController {
         try {
             // Obtener todas las notificaciones de administradores
             List<Notification> adminNotifications = notificationRepository.findByTargetRole("admin");
-            
+
             if (adminNotifications.isEmpty()) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", true);
