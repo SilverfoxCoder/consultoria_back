@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
@@ -19,4 +20,9 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
      */
     @Query("SELECT COUNT(c) FROM Client c WHERE c.lastContact BETWEEN :start AND :end")
     long countActiveInPeriod(@Param("start") java.time.LocalDate start, @Param("end") java.time.LocalDate end);
+
+    /**
+     * Buscar cliente por email
+     */
+    Optional<Client> findByEmail(String email);
 }
