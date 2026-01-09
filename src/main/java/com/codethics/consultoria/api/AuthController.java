@@ -92,12 +92,17 @@ public class AuthController {
                     response.setSuccess(true);
                     response.setMessage("Login exitoso");
                     response.setToken("token_" + user.getId() + "_" + System.currentTimeMillis());
+
+                    // Resolver clientId si aplica
+                    Long clientId = resolveClientId(user);
+
                     response.setUser(new HashMap<>() {
                         {
                             put("id", user.getId());
                             put("name", user.getName());
                             put("email", user.getEmail());
                             put("role", user.getRole());
+                            put("clientId", clientId);
                         }
                     });
 
@@ -279,12 +284,7 @@ public class AuthController {
             }
 
             // Asegurar clientId si rol = client
-            Long clientId = null;
-            if ("client".equals(user.getRole())) {
-                Optional<Client> clientOpt = clientRepository.findByEmail(user.getEmail());
-                Client client = clientOpt.orElseGet(() -> getOrCreateClientForUser(user));
-                clientId = client != null ? client.getId() : null;
-            }
+            Long clientId = resolveClientId(user);
 
             // Crear respuesta exitosa
             LoginResponse response = new LoginResponse();
@@ -395,12 +395,7 @@ public class AuthController {
             }
 
             // Asegurar clientId si rol = client
-            Long clientId = null;
-            if ("client".equals(user.getRole())) {
-                Optional<Client> clientOpt = clientRepository.findByEmail(user.getEmail());
-                Client client = clientOpt.orElseGet(() -> getOrCreateClientForUser(user));
-                clientId = client != null ? client.getId() : null;
-            }
+            Long clientId = resolveClientId(user);
 
             // Crear respuesta exitosa
             LoginResponse response = new LoginResponse();
@@ -495,6 +490,22 @@ public class AuthController {
             response.put("message", "Error al cambiar contraseña: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
+    }
+
+    /**
+     * Resolver el ID del cliente para un usuario dado.
+     * Si el usuario tiene rol 'client', busca o crea el cliente correspondiente.
+     * 
+     * @param user Usuario autenticado
+     * @return ID del cliente o null si no aplica
+     */
+    private Long resolveClientId(User user) {
+        if ("client".equals(user.getRole())) {
+            Optional<Client> clientOpt = clientRepository.findByEmail(user.getEmail());
+            Client client = clientOpt.orElseGet(() -> getOrCreateClientForUser(user));
+            return client != null ? client.getId() : null;
+        }
+        return null;
     }
 
     /**
