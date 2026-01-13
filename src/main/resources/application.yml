@@ -52,15 +52,8 @@ spring:
   # =====================================================
   # CONFIGURACIÓN CORS
   # =====================================================
-  web:
-    cors:
-      # Permitir todos los orígenes (configuración general)
-      # La configuración específica está en CorsConfig.java
-      allowed-origins: "*"
-      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS,HEAD,TRACE,CONNECT"
-      allowed-headers: "*"
-      allow-credentials: true
-      max-age: 3600
+  # La configuración de CORS está manejada en CorsConfig.java
+  # para evitar conflictos y tener un control más granular
 
 # =====================================================
 # PERFIL MYSQL (CONFIGURACIÓN ESPECÍFICA)
@@ -72,9 +65,10 @@ spring:
       on-profile: mysql
   # Configuración específica para MySQL en producción
   datasource:
-    url: jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: TnSf2024@.@
+    # Usar variables de entorno si están disponibles, sino usar valores por defecto (localhost)
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:TnSf2024@.@}
     driver-class-name: com.mysql.cj.jdbc.Driver
     
   jpa:
@@ -87,9 +81,9 @@ spring:
         format_sql: true
         
   flyway:
-    url: jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    user: root
-    password: TnSf2024@.@
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    user: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:TnSf2024@.@}
     driver-class-name: com.mysql.cj.jdbc.Driver
     enabled: false
     locations: classpath:db/migration

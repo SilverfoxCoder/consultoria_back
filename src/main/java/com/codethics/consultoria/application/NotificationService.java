@@ -29,15 +29,38 @@ public class NotificationService {
      * Crear una nueva notificación
      */
     public Notification createNotification(Notification notification) {
-        notification.setCreatedAt(LocalDateTime.now());
-        Notification saved = notificationRepository.save(notification);
+        try {
+            // Validar que la notificación tenga los campos requeridos
+            if (notification.getTitle() == null || notification.getTitle().trim().isEmpty()) {
+                throw new IllegalArgumentException("El título es requerido para crear la notificación");
+            }
 
-        System.out.println("📢 Notificación creada: " + saved.getTitle());
+            if (notification.getMessage() == null || notification.getMessage().trim().isEmpty()) {
+                throw new IllegalArgumentException("El mensaje es requerido para crear la notificación");
+            }
 
-        // Enviar por WebSocket si está disponible
-        sendNotificationViaWebSocket(saved);
+            // Validar que tenga al menos un target (userId o role)
+            if (notification.getTargetUserId() == null &&
+                    (notification.getTargetRole() == null || notification.getTargetRole().trim().isEmpty())) {
+                throw new IllegalArgumentException("Se requiere userId o role para crear la notificación");
+            }
 
-        return saved;
+            notification.setCreatedAt(LocalDateTime.now());
+            Notification saved = notificationRepository.save(notification);
+
+            System.out.println("📢 Notificación creada: " + saved.getTitle() +
+                    " (Target: " + (saved.getTargetUserId() != null ? "User " + saved.getTargetUserId()
+                            : "Role " + saved.getTargetRole())
+                    + ")");
+
+            // Enviar por WebSocket si está disponible
+            sendNotificationViaWebSocket(saved);
+
+            return saved;
+        } catch (Exception e) {
+            System.err.println("❌ Error creando notificación: " + e.getMessage());
+            throw e;
+        }
     }
 
     /**
@@ -100,17 +123,22 @@ public class NotificationService {
      * Notificar nuevo presupuesto a administradores
      */
     public void notifyNewBudget(Long budgetId, Long clientId, String budgetTitle) {
-        Notification notification = new Notification(
-                "BUDGET_PENDING",
-                "Nuevo Presupuesto Pendiente",
-                "Nuevo presupuesto \"" + budgetTitle + "\" requiere aprobación",
-                "high");
-        notification.setTargetRole("admin");
-        notification.setRelatedEntityId(budgetId);
-        notification.setRelatedEntityType("BUDGET");
+        try {
+            Notification notification = new Notification(
+                    "BUDGET_PENDING",
+                    "Nuevo Presupuesto Pendiente",
+                    "Nuevo presupuesto \"" + budgetTitle + "\" requiere aprobación",
+                    "high");
+            notification.setTargetRole("admin");
+            notification.setRelatedEntityId(budgetId);
+            notification.setRelatedEntityType("BUDGET");
 
-        createNotification(notification);
-        System.out.println("📊 Notificación de nuevo presupuesto enviada a administradores");
+            createNotification(notification);
+            System.out.println("📊 Notificación de nuevo presupuesto enviada a administradores");
+        } catch (Exception e) {
+            System.err.println("⚠️ Error creando notificación de nuevo presupuesto: " + e.getMessage());
+            // No fallar la creación del presupuesto por error de notificación
+        }
     }
 
     /**

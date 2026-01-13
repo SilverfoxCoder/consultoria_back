@@ -13,13 +13,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
     private final UserRepository userRepository;
+    private final CorsConfigurationSource corsConfigurationSource;
 
-    public SecurityConfig(UserRepository userRepository) {
+    public SecurityConfig(UserRepository userRepository, CorsConfigurationSource corsConfigurationSource) {
         this.userRepository = userRepository;
+        this.corsConfigurationSource = corsConfigurationSource;
     }
 
     @Bean
@@ -65,11 +68,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.and()) // Habilitar CORS usando configuración por defecto
+                .cors(cors -> cors.configurationSource(corsConfigurationSource)) // Usar configuración CORS específica
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // Permitir todos los requests sin autenticación
                 );
+
+        System.out.println("✅ SecurityFilterChain configurado con CORS personalizado");
         return http.build();
     }
 }

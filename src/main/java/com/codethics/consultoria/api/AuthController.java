@@ -92,12 +92,17 @@ public class AuthController {
                     response.setSuccess(true);
                     response.setMessage("Login exitoso");
                     response.setToken("token_" + user.getId() + "_" + System.currentTimeMillis());
+
+                    // Resolver clientId si aplica
+                    Long clientId = resolveClientId(user);
+
                     response.setUser(new HashMap<>() {
                         {
                             put("id", user.getId());
                             put("name", user.getName());
                             put("email", user.getEmail());
                             put("role", user.getRole());
+                            put("clientId", clientId);
                         }
                     });
 
@@ -245,7 +250,7 @@ public class AuthController {
 
                 // Si el rol es 'client', crear automáticamente la entrada en la tabla clients
                 if ("client".equals(role)) {
-                    createClientForUser(user);
+                    getOrCreateClientForUser(user);
                 }
 
                 // Crear notificación de bienvenida para nuevo usuario
@@ -278,19 +283,21 @@ public class AuthController {
                 adminNotificationService.notifyFirstUserLogin(user);
             }
 
+            // Asegurar clientId si rol = client
+            Long clientId = resolveClientId(user);
+
             // Crear respuesta exitosa
             LoginResponse response = new LoginResponse();
             response.setSuccess(true);
             response.setMessage("Login con Google exitoso");
             response.setToken("google_token_" + user.getId() + "_" + System.currentTimeMillis());
-            response.setUser(new HashMap<>() {
-                {
-                    put("id", user.getId());
-                    put("name", user.getName());
-                    put("email", user.getEmail());
-                    put("role", user.getRole());
-                }
-            });
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", user.getId());
+            userMap.put("name", user.getName());
+            userMap.put("email", user.getEmail());
+            userMap.put("role", user.getRole());
+            userMap.put("clientId", clientId);
+            response.setUser(userMap);
 
             return ResponseEntity.ok(response);
 
@@ -354,7 +361,7 @@ public class AuthController {
 
                 // Si el rol es 'client', crear automáticamente la entrada en la tabla clients
                 if ("client".equals(role)) {
-                    createClientForUser(user);
+                    getOrCreateClientForUser(user);
                 }
 
                 // Crear notificación de bienvenida para nuevo usuario
@@ -387,6 +394,9 @@ public class AuthController {
                 adminNotificationService.notifyFirstUserLogin(user);
             }
 
+            // Asegurar clientId si rol = client
+            Long clientId = resolveClientId(user);
+
             // Crear respuesta exitosa
             LoginResponse response = new LoginResponse();
             response.setSuccess(true);
@@ -398,6 +408,7 @@ public class AuthController {
                     put("name", user.getName());
                     put("email", user.getEmail());
                     put("role", user.getRole());
+                    put("clientId", clientId);
                 }
             });
 
@@ -482,14 +493,33 @@ public class AuthController {
     }
 
     /**
+     * Resolver el ID del cliente para un usuario dado.
+     * Si el usuario tiene rol 'client', busca o crea el cliente correspondiente.
+     * 
+     * @param user Usuario autenticado
+     * @return ID del cliente o null si no aplica
+     */
+    private Long resolveClientId(User user) {
+        if ("client".equals(user.getRole())) {
+            Optional<Client> clientOpt = clientRepository.findByEmail(user.getEmail());
+            Client client = clientOpt.orElseGet(() -> getOrCreateClientForUser(user));
+            return client != null ? client.getId() : null;
+        }
+        return null;
+    }
+
+    /**
      * Crear entrada de cliente automáticamente cuando un usuario tiene rol 'client'
      * 
      * @param user Usuario para el cual crear el cliente
      */
-    private void createClientForUser(User user) {
+    private Client getOrCreateClientForUser(User user) {
         try {
-            // Verificar si ya existe un cliente con este email
-            // (por si se ejecuta múltiples veces)
+            // Evitar duplicados: buscar por email
+            Optional<Client> existing = clientRepository.findByEmail(user.getEmail());
+            if (existing.isPresent()) {
+                return existing.get();
+            }
 
             Client newClient = new Client();
             newClient.setName(user.getName());
@@ -501,9 +531,11 @@ public class AuthController {
             Client savedClient = clientRepository.save(newClient);
             System.out.println("✅ Cliente creado automáticamente: " + savedClient.getName() + " (ID: "
                     + savedClient.getId() + ")");
+            return savedClient;
 
         } catch (Exception e) {
-            System.err.println("❌ Error creando cliente automáticamente: " + e.getMessage());
+            System.err.println("❌ Error creando/obteniendo cliente automáticamente: " + e.getMessage());
+            return null;
         }
     }
 

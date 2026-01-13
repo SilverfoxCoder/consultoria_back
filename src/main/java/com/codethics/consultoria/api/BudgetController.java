@@ -49,6 +49,80 @@ public class BudgetController {
     private com.codethics.consultoria.application.AdminNotificationService adminNotificationService;
 
     /**
+     * Endpoint de prueba simple para diagnosticar problemas
+     */
+    @PostMapping("/test-simple")
+    @Operation(summary = "Endpoint de prueba simple")
+    public ResponseEntity<Map<String, Object>> testSimple(@RequestBody(required = false) String rawBody) {
+        try {
+            System.out.println("🔍 === TEST SIMPLE ENDPOINT ===");
+            System.out.println("🔍 Raw body recibido: " + rawBody);
+            System.out.println("🔍 Tipo de body: " + (rawBody != null ? rawBody.getClass().getName() : "null"));
+            System.out.println("🔍 Longitud del body: " + (rawBody != null ? rawBody.length() : 0));
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Endpoint de prueba funcionando");
+            response.put("rawBody", rawBody);
+            response.put("bodyType", rawBody != null ? rawBody.getClass().getName() : "null");
+            response.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("❌ Error en test simple: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Error en endpoint de prueba");
+            errorResponse.put("error", e.getMessage());
+
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    /**
+     * Endpoint de prueba con Map genérico
+     */
+    @PostMapping("/test-map")
+    @Operation(summary = "Endpoint de prueba con Map")
+    public ResponseEntity<Map<String, Object>> testMap(@RequestBody(required = false) Map<String, Object> data) {
+        try {
+            System.out.println("🔍 === TEST MAP ENDPOINT ===");
+            System.out.println("🔍 Data recibida: " + data);
+            System.out.println("🔍 Tipo de data: " + (data != null ? data.getClass().getName() : "null"));
+
+            if (data != null) {
+                for (Map.Entry<String, Object> entry : data.entrySet()) {
+                    System.out.println("🔍 Campo '" + entry.getKey() + "': " + entry.getValue() +
+                            " (tipo: " + (entry.getValue() != null ? entry.getValue().getClass().getName() : "null")
+                            + ")");
+                }
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Endpoint Map funcionando");
+            response.put("receivedData", data);
+            response.put("dataType", data != null ? data.getClass().getName() : "null");
+            response.put("fieldCount", data != null ? data.size() : 0);
+            response.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("❌ Error en test map: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Error en endpoint Map");
+            errorResponse.put("error", e.getMessage());
+
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    /**
      * Crear un nuevo presupuesto
      * 
      * @param request Datos del presupuesto a crear
@@ -141,26 +215,53 @@ public class BudgetController {
             @RequestBody BudgetRequest request) {
 
         try {
+            System.out.println("=== DEBUG: createBudgetForClient called ===");
+            System.out.println("ClientId from path: " + clientId);
+            System.out.println("Request: " + request);
+            System.out.println("Title: " + request.getTitle());
+            System.out.println("Description: " + request.getDescription());
+            System.out.println("ServiceType: " + request.getServiceType());
+            System.out.println("Budget: " + request.getBudget());
+            System.out.println("Timeline: " + request.getTimeline());
+            System.out.println("AdditionalInfo: " + request.getAdditionalInfo());
+            System.out.println("ClientId from request: " + request.getClientId());
+
+            // Validar campos requeridos
+            if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+                System.err.println("❌ ERROR: Título es requerido");
+                return ResponseEntity.badRequest().build();
+            }
+
+            if (request.getServiceType() == null || request.getServiceType().trim().isEmpty()) {
+                System.err.println("❌ ERROR: Tipo de servicio es requerido");
+                return ResponseEntity.badRequest().build();
+            }
+
             // Validar que el cliente existe
+            System.out.println("Buscando cliente con ID: " + clientId);
             Optional<Client> clientOptional = clientRepository.findById(clientId);
             if (clientOptional.isEmpty()) {
+                System.err.println("❌ ERROR: Cliente no encontrado con ID: " + clientId);
                 return ResponseEntity.notFound().build();
             }
 
             Client client = clientOptional.get();
+            System.out.println("✅ Cliente encontrado: " + client.getName());
 
             // Crear el presupuesto
             Budget budget = new Budget();
             budget.setTitle(request.getTitle());
-            budget.setDescription(request.getDescription());
+            budget.setDescription(request.getDescription() != null ? request.getDescription() : "");
             budget.setServiceType(request.getServiceType());
             budget.setBudget(request.getBudget());
-            budget.setTimeline(request.getTimeline());
-            budget.setAdditionalInfo(request.getAdditionalInfo());
+            budget.setTimeline(request.getTimeline() != null ? request.getTimeline() : "");
+            budget.setAdditionalInfo(request.getAdditionalInfo() != null ? request.getAdditionalInfo() : "");
             budget.setClient(client);
             budget.setStatus(Budget.BudgetStatus.PENDIENTE);
 
+            System.out.println("Budget creado, guardando...");
             Budget savedBudget = budgetRepository.save(budget);
+            System.out.println("✅ Budget guardado con ID: " + savedBudget.getId());
 
             // 📢 NOTIFICACIÓN: Nuevo presupuesto creado
             try {
@@ -179,15 +280,20 @@ public class BudgetController {
 
             } catch (Exception notifEx) {
                 System.err.println("⚠️ Error enviando notificación: " + notifEx.getMessage());
+                System.err.println("⚠️ Stack trace: " + notifEx.getStackTrace());
                 // No fallar la creación del presupuesto por error de notificación
+                // El presupuesto se creó exitosamente, solo falló la notificación
             }
 
             // Convertir a DTO de respuesta
             BudgetResponse response = convertToResponse(savedBudget);
+            System.out.println("✅ Response creado: " + response.getId());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
+            System.err.println("❌ ERROR en createBudgetForClient: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -479,22 +585,68 @@ public class BudgetController {
     }
 
     /**
-     * Endpoint de prueba para verificar el servidor
-     * 
-     * @return Mensaje de prueba
+     * Endpoint de debug para ver qué datos envía el frontend
      */
-    @GetMapping("/test")
-    @Operation(summary = "Endpoint de prueba")
-    public ResponseEntity<Map<String, Object>> testEndpoint() {
+    @PostMapping("/debug")
+    @Operation(summary = "Debug endpoint para ver datos del frontend")
+    public ResponseEntity<Map<String, Object>> debugBudgetRequest(@RequestBody Map<String, Object> data) {
         try {
+            System.out.println("🔍 DEBUG - Datos recibidos del frontend:");
+            System.out.println("🔍 Tipo de datos: " + data.getClass().getName());
+            System.out.println("🔍 Contenido: " + data.toString());
+
+            // Mostrar cada campo individualmente
+            for (Map.Entry<String, Object> entry : data.entrySet()) {
+                System.out.println("🔍 Campo '" + entry.getKey() + "': " + entry.getValue() + " (tipo: " +
+                        (entry.getValue() != null ? entry.getValue().getClass().getName() : "null") + ")");
+            }
+
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Servidor funcionando correctamente");
-            response.put("timestamp", System.currentTimeMillis());
+            response.put("success", true);
+            response.put("message", "Datos recibidos correctamente");
+            response.put("receivedData", data);
+            response.put("dataType", data.getClass().getName());
+            response.put("fieldCount", data.size());
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.internalServerError().body(error);
+            System.err.println("❌ Error en debug: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Error procesando datos");
+            errorResponse.put("error", e.getMessage());
+
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    /**
+     * Endpoint de test para verificar que el controlador funciona
+     */
+    @GetMapping("/test")
+    @Operation(summary = "Test del controlador de presupuestos")
+    public ResponseEntity<Map<String, Object>> testController() {
+        try {
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "OK");
+            response.put("message", "Controlador de presupuestos funcionando correctamente");
+            response.put("timestamp", System.currentTimeMillis());
+            response.put("endpoints", List.of(
+                    "POST /api/budgets - Crear presupuesto",
+                    "POST /api/budgets/client/{clientId} - Crear presupuesto para cliente",
+                    "GET /api/budgets - Obtener todos los presupuestos",
+                    "GET /api/budgets/{id} - Obtener presupuesto por ID",
+                    "PUT /api/budgets/{id} - Actualizar presupuesto",
+                    "DELETE /api/budgets/{id} - Eliminar presupuesto",
+                    "POST /api/budgets/debug - Debug endpoint"));
+
+            System.out.println("✅ Test del controlador de presupuestos exitoso");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("❌ Error en test del controlador: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
         }
     }
 

@@ -14,7 +14,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notifications")
-@CrossOrigin(origins = "http://localhost:3000")
 @Tag(name = "Notifications", description = "Gestión de notificaciones del sistema")
 public class NotificationController {
 
@@ -267,6 +266,56 @@ public class NotificationController {
         } catch (Exception e) {
             System.err.println("❌ Error creando notificación de bienvenida: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Crear notificación de nuevo presupuesto (específico para presupuestos)
+     */
+    @PostMapping("/budget")
+    @Operation(summary = "Crear notificación de nuevo presupuesto")
+    public ResponseEntity<Map<String, Object>> createBudgetNotification(@RequestBody Map<String, Object> data) {
+        try {
+            System.out.println("📢 Creando notificación de presupuesto con datos: " + data);
+
+            // Extraer datos del Map con manejo seguro
+            String title = extractString(data, "title", "Nuevo Presupuesto");
+            String message = extractString(data, "message", "Se ha creado un nuevo presupuesto");
+            String priority = extractString(data, "priority", "high");
+            String targetRole = extractString(data, "targetRole", "admin");
+            Long budgetId = extractLong(data, "budgetId");
+            String budgetTitle = extractString(data, "budgetTitle", "Presupuesto");
+
+            // Crear notificación
+            Notification notification = new Notification("BUDGET_PENDING", title, message, priority);
+            notification.setTargetRole(targetRole);
+
+            if (budgetId != null) {
+                notification.setRelatedEntityId(budgetId);
+                notification.setRelatedEntityType("BUDGET");
+            }
+
+            // Guardar notificación
+            Notification created = notificationService.createNotification(notification);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Notificación de presupuesto creada correctamente");
+            response.put("notification", created);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error creando notificación de presupuesto: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Error creando notificación de presupuesto");
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("receivedData", data);
+
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 
