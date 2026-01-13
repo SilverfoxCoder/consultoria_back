@@ -35,88 +35,97 @@ import java.util.List;
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
-    private static final List<String> ALLOWED_ORIGINS = Arrays.asList(
-            "http://localhost:3000",
-            "https://localhost:3000",
-            "http://127.0.0.1:3000",
-            "https://127.0.0.1:3000");
+        // Obtener orígenes permitidos desde variable de entorno o usar defaults
+        private static final String ENV_ALLOWED_ORIGINS = System.getenv("CORS_ALLOWED_ORIGINS");
 
-    private static final List<String> ALLOWED_METHODS = Arrays.asList(
-            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "TRACE", "CONNECT");
+        private static final List<String> ALLOWED_ORIGINS = ENV_ALLOWED_ORIGINS != null
+                        && !ENV_ALLOWED_ORIGINS.isEmpty()
+                                        ? Arrays.asList(ENV_ALLOWED_ORIGINS.split(","))
+                                        : Arrays.asList(
+                                                        "http://localhost:3000",
+                                                        "https://localhost:3000",
+                                                        "http://127.0.0.1:3000",
+                                                        "https://127.0.0.1:3000",
+                                                        "*" // Permitir todo temporalmente para facilitar despliegue,
+                                                            // idealmente restringir en prod
+                                        );
 
-    private static final List<String> ALLOWED_HEADERS = Arrays.asList(
-            "*");
+        private static final List<String> ALLOWED_METHODS = Arrays.asList(
+                        "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "TRACE", "CONNECT");
 
-    private static final List<String> EXPOSED_HEADERS = Arrays.asList(
-            "Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin");
+        private static final List<String> ALLOWED_HEADERS = Arrays.asList(
+                        "*");
 
-    /**
-     * Configuración de CORS para WebMvc
-     * 
-     * Esta configuración se aplica a todos los endpoints que usan
-     * @RequestMapping, @GetMapping, @PostMapping, etc.
-     * 
-     * @param registry Registro de configuración CORS
-     */
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // Aplicar a todos los endpoints
-                .allowedOrigins(ALLOWED_ORIGINS.toArray(new String[0])) // Frontend específico
-                .allowedMethods(ALLOWED_METHODS.toArray(new String[0]))
-                .allowedHeaders(ALLOWED_HEADERS.toArray(new String[0])) // Permitir todos los headers
-                .exposedHeaders(EXPOSED_HEADERS.toArray(new String[0])) // Headers expuestos al frontend
-                .allowCredentials(true) // Permitir cookies y autenticación
-                .maxAge(3600); // Cache de preflight por 1 hora
+        private static final List<String> EXPOSED_HEADERS = Arrays.asList(
+                        "Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin");
 
-        // Configuración específica para WebSocket de notificaciones
-        registry.addMapping("/ws/**")
-                .allowedOrigins(ALLOWED_ORIGINS.toArray(new String[0]))
-                .allowedMethods("*")
-                .allowedHeaders("*")
-                .allowCredentials(true);
+        /**
+         * Configuración de CORS para WebMvc
+         * 
+         * Esta configuración se aplica a todos los endpoints que usan
+         * @RequestMapping, @GetMapping, @PostMapping, etc.
+         * 
+         * @param registry Registro de configuración CORS
+         */
+        @Override
+        public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**") // Aplicar a todos los endpoints
+                                .allowedOrigins(ALLOWED_ORIGINS.toArray(new String[0])) // Frontend específico
+                                .allowedMethods(ALLOWED_METHODS.toArray(new String[0]))
+                                .allowedHeaders(ALLOWED_HEADERS.toArray(new String[0])) // Permitir todos los headers
+                                .exposedHeaders(EXPOSED_HEADERS.toArray(new String[0])) // Headers expuestos al frontend
+                                .allowCredentials(true) // Permitir cookies y autenticación
+                                .maxAge(3600); // Cache de preflight por 1 hora
 
-        System.out.println("✅ CORS configurado correctamente:");
-        System.out.println("   - Orígenes permitidos: " + String.join(", ", ALLOWED_ORIGINS));
-        System.out.println("   - Métodos permitidos: " + String.join(", ", ALLOWED_METHODS));
-        System.out.println("   - Endpoints API: /**");
-        System.out.println("   - Endpoints WebSocket: /ws/**");
-    }
+                // Configuración específica para WebSocket de notificaciones
+                registry.addMapping("/ws/**")
+                                .allowedOrigins(ALLOWED_ORIGINS.toArray(new String[0]))
+                                .allowedMethods("*")
+                                .allowedHeaders("*")
+                                .allowCredentials(true);
 
-    /**
-     * Configuración de CORS para Spring Security
-     * 
-     * Esta configuración se usa específicamente por Spring Security
-     * para manejar las peticiones preflight y CORS.
-     * 
-     * @return CorsConfigurationSource configurado
-     */
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+                System.out.println("✅ CORS configurado correctamente:");
+                System.out.println("   - Orígenes permitidos: " + String.join(", ", ALLOWED_ORIGINS));
+                System.out.println("   - Métodos permitidos: " + String.join(", ", ALLOWED_METHODS));
+                System.out.println("   - Endpoints API: /**");
+                System.out.println("   - Endpoints WebSocket: /ws/**");
+        }
 
-        // Configurar orígenes permitidos
-        configuration.setAllowedOrigins(ALLOWED_ORIGINS);
+        /**
+         * Configuración de CORS para Spring Security
+         * 
+         * Esta configuración se usa específicamente por Spring Security
+         * para manejar las peticiones preflight y CORS.
+         * 
+         * @return CorsConfigurationSource configurado
+         */
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
 
-        // Configurar métodos permitidos
-        configuration.setAllowedMethods(ALLOWED_METHODS);
+                // Configurar orígenes permitidos
+                configuration.setAllowedOrigins(ALLOWED_ORIGINS);
 
-        // Configurar headers permitidos
-        configuration.setAllowedHeaders(ALLOWED_HEADERS);
+                // Configurar métodos permitidos
+                configuration.setAllowedMethods(ALLOWED_METHODS);
 
-        // Configurar headers expuestos
-        configuration.setExposedHeaders(EXPOSED_HEADERS);
+                // Configurar headers permitidos
+                configuration.setAllowedHeaders(ALLOWED_HEADERS);
 
-        // Permitir credenciales
-        configuration.setAllowCredentials(true);
+                // Configurar headers expuestos
+                configuration.setExposedHeaders(EXPOSED_HEADERS);
 
-        // Configurar tiempo de cache para preflight
-        configuration.setMaxAge(3600L);
+                // Permitir credenciales
+                configuration.setAllowCredentials(true);
 
-        // Configurar el origen de la configuración
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+                // Configurar tiempo de cache para preflight
+                configuration.setMaxAge(3600L);
 
-        System.out.println("✅ CorsConfigurationSource configurado para Spring Security");
-        return source;
-    }
+                // Configurar el origen de la configuración
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+
+                System.out.println("✅ CorsConfigurationSource configurado para Spring Security");
+                return source;
+        }
 }
