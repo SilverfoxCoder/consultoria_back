@@ -216,7 +216,7 @@ const response = await fetch('http://localhost:8080/api/projects', {
 
 ### Estructura de Archivos
 ```
-src/main/java/com/codethics/consultoria/
+src/main/java/com/xperiecia/consultoria/
 ├── api/           # Controllers
 ├── domain/        # Entities y Repositories
 ├── dto/           # Data Transfer Objects

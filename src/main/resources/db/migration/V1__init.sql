@@ -4,7 +4,7 @@
 -- Este archivo crea la estructura inicial de la base de datos
 -- incluyendo todas las tablas principales del sistema
 -- 
--- AUTOR: CodEthics Team
+-- AUTOR: Xperiecia Team
 -- VERSIÓN: 1.0
 -- FECHA: Agosto 2025
 
@@ -26,7 +26,7 @@ CREATE TABLE users (
 -- Datos de prueba para usuarios
 -- Contraseña: admin123 (hash bcrypt)
 INSERT INTO users (name, email, password_hash, role, phone, status) VALUES
-('Administrador', 'admin@codexcore.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', '123456789', 'active'),
+('Administrador', 'admin@xperiecia.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', '123456789', 'active'),
 ('Cliente Demo', 'cliente@empresa.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'client', '987654321', 'active');
 
 -- =====================================================

@@ -14,7 +14,7 @@ spring:
     # - serverTimezone=UTC: Usar zona horaria UTC
     # - allowPublicKeyRetrieval=true: Permitir recuperación de clave pública
     # Usar variables de entorno o valores por defecto para desarrollo local
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/xperiecia?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:TnSf2024@.@}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -39,7 +39,7 @@ spring:
   # =====================================================
   flyway:
     # Configuración específica para Flyway
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/xperiecia?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
     user: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:TnSf2024@.@}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -67,7 +67,7 @@ spring:
   # Configuración específica para MySQL en producción
   datasource:
     # Usar variables de entorno si están disponibles, sino usar valores por defecto (localhost)
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/xperiecia?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:TnSf2024@.@}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -82,7 +82,7 @@ spring:
         format_sql: true
         
   flyway:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/xperiecia?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
     user: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:TnSf2024@.@}
     driver-class-name: com.mysql.cj.jdbc.Driver

@@ -20,13 +20,13 @@ cd consultoria-back
 2. **Configurar base de datos**
 ```bash
 # Crear base de datos si no existe
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS codethics;"
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS xperiecia;"
 
 # Ejecutar script de configuración
 mysql -u root -p -e "source database_setup.sql"
 
 # O ejecutar migración manual
-mysql -u root -p codethics < src/main/resources/db/migration/V1__init.sql
+mysql -u root -p xperiecia < src/main/resources/db/migration/V1__init.sql
 ```
 
 3. **Compilar y ejecutar**
@@ -67,7 +67,7 @@ curl http://localhost:8080/api/projects
 ## 📁 Estructura del Proyecto
 
 ```
-src/main/java/com/codethics/consultoria/
+src/main/java/com/xperiecia/consultoria/
 ├── api/           # Controllers REST
 ├── domain/        # Entities y Repositories
 ├── dto/           # Data Transfer Objects
@@ -92,7 +92,7 @@ src/main/resources/
 ## 🌐 Configuración
 
 - **Puerto**: 8080
-- **Base de datos**: codethics
+- **Base de datos**: xperiecia
 - **CORS**: Configurado para localhost:3000
 - **Migraciones**: Flyway temporalmente deshabilitado
 

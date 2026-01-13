@@ -14,7 +14,7 @@
 -- VERSIÓN: 1.0
 -- FECHA: Agosto 2025
 
-USE codethics;
+USE xperiecia;
 
 -- =====================================================
 -- 1. VERIFICACIÓN DE ESTRUCTURA
@@ -46,7 +46,7 @@ SELECT
 FROM 
     INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
 WHERE 
-    TABLE_SCHEMA = 'codethics' 
+    TABLE_SCHEMA = 'xperiecia' 
     AND REFERENCED_TABLE_NAME IS NOT NULL;
 
 -- =====================================================
