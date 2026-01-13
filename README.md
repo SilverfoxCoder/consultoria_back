@@ -20,13 +20,13 @@ cd consultoria-back
 2. **Configurar base de datos**
 ```bash
 # Crear base de datos si no existe
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS xperiecia;"
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS codethics;"
 
 # Ejecutar script de configuración
 mysql -u root -p -e "source database_setup.sql"
 
 # O ejecutar migración manual
-mysql -u root -p xperiecia < src/main/resources/db/migration/V1__init.sql
+mysql -u root -p codethics < src/main/resources/db/migration/V1__init.sql
 ```
 
 3. **Compilar y ejecutar**
@@ -92,7 +92,7 @@ src/main/resources/
 ## 🌐 Configuración
 
 - **Puerto**: 8080
-- **Base de datos**: xperiecia
+- **Base de datos**: codethics
 - **CORS**: Configurado para localhost:3000
 - **Migraciones**: Flyway temporalmente deshabilitado
 

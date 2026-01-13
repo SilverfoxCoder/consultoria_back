@@ -45,9 +45,7 @@ public class CorsConfig implements WebMvcConfigurer {
                                                         "http://localhost:3000",
                                                         "https://localhost:3000",
                                                         "http://127.0.0.1:3000",
-                                                        "https://127.0.0.1:3000",
-                                                        "*" // Permitir todo temporalmente para facilitar despliegue,
-                                                            // idealmente restringir en prod
+                                                        "https://127.0.0.1:3000"
                                         );
 
         private static final List<String> ALLOWED_METHODS = Arrays.asList(

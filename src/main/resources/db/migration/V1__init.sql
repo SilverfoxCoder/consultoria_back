@@ -26,7 +26,7 @@ CREATE TABLE users (
 -- Datos de prueba para usuarios
 -- Contraseña: admin123 (hash bcrypt)
 INSERT INTO users (name, email, password_hash, role, phone, status) VALUES
-('Administrador', 'admin@xperiecia.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', '123456789', 'active'),
+('Administrador', 'admin@code.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', '123456789', 'active'),
 ('Cliente Demo', 'cliente@empresa.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'client', '987654321', 'active');
 
 -- =====================================================
@@ -322,7 +322,7 @@ AND p.resource = 'projects' AND p.action = 'read';
 -- Asignar roles a usuarios existentes
 INSERT INTO user_roles (user_id, role_id)
 SELECT u.id, r.id FROM users u, roles r 
-WHERE u.email = 'admin@codexcore.com' AND r.name = 'Administrador';
+WHERE u.email = 'admin@xperiecia.com' AND r.name = 'Administrador';
 
 INSERT INTO user_roles (user_id, role_id)
 SELECT u.id, r.id FROM users u, roles r 

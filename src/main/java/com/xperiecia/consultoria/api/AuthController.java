@@ -101,7 +101,10 @@ public class AuthController {
                             put("id", user.getId());
                             put("name", user.getName());
                             put("email", user.getEmail());
-                            put("role", user.getRole());
+                            put("role", user.getRole() != null ? user.getRole().toUpperCase() : null);
+                            put("roles", user.getRoles() != null ? user.getRoles().stream()
+                                    .map(r -> r.getName())
+                                    .collect(java.util.stream.Collectors.toList()) : java.util.Collections.emptyList());
                             put("clientId", clientId);
                         }
                     });
@@ -295,7 +298,10 @@ public class AuthController {
             userMap.put("id", user.getId());
             userMap.put("name", user.getName());
             userMap.put("email", user.getEmail());
-            userMap.put("role", user.getRole());
+            userMap.put("role", user.getRole() != null ? user.getRole().toUpperCase() : null);
+            userMap.put("roles", user.getRoles() != null ? user.getRoles().stream()
+                    .map(r -> r.getName())
+                    .collect(java.util.stream.Collectors.toList()) : java.util.Collections.emptyList());
             userMap.put("clientId", clientId);
             response.setUser(userMap);
 
@@ -407,7 +413,10 @@ public class AuthController {
                     put("id", user.getId());
                     put("name", user.getName());
                     put("email", user.getEmail());
-                    put("role", user.getRole());
+                    put("role", user.getRole() != null ? user.getRole().toUpperCase() : null);
+                    put("roles", user.getRoles() != null ? user.getRoles().stream()
+                            .map(r -> r.getName())
+                            .collect(java.util.stream.Collectors.toList()) : java.util.Collections.emptyList());
                     put("clientId", clientId);
                 }
             });
