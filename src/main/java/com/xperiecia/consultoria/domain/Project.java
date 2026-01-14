@@ -53,6 +53,15 @@ public class Project {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "hours_logged")
+    private Float hoursLogged = 0.0f;
+
+    @Column(name = "efficiency_score")
+    private Float efficiencyScore = 0.0f;
+
+    @Column(name = "executive_summary", columnDefinition = "TEXT")
+    private String executiveSummary;
+
     @Column(name = "jira_enabled")
     private Boolean jiraEnabled = false;
 

@@ -26,7 +26,8 @@ public class TaskService {
     private final UserRepository userRepository;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository, ProjectRepository projectRepository, UserRepository userRepository) {
+    public TaskService(TaskRepository taskRepository, ProjectRepository projectRepository,
+            UserRepository userRepository) {
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
@@ -47,7 +48,7 @@ public class TaskService {
 
     public TaskDTO createTask(CreateTaskRequest request) {
         validateTaskRequest(request);
-        
+
         Task task = new Task();
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
@@ -60,14 +61,16 @@ public class TaskService {
         // Establecer proyecto
         if (request.getProjectId() != null) {
             Project project = projectRepository.findById(request.getProjectId())
-                    .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID: " + request.getProjectId()));
+                    .orElseThrow(
+                            () -> new RuntimeException("Proyecto no encontrado con ID: " + request.getProjectId()));
             task.setProject(project);
         }
 
         // Establecer usuario asignado
         if (request.getAssignedToId() != null) {
             User user = userRepository.findById(request.getAssignedToId())
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + request.getAssignedToId()));
+                    .orElseThrow(
+                            () -> new RuntimeException("Usuario no encontrado con ID: " + request.getAssignedToId()));
             task.setAssignedTo(user);
         }
 
@@ -85,31 +88,40 @@ public class TaskService {
         return TaskDTO.fromEntity(savedTask);
     }
 
-    public TaskDTO updateTask(Long id, CreateTaskRequest request) {
+    public TaskDTO updateTask(Long id, com.xperiecia.consultoria.dto.UpdateTaskRequest request) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tarea no encontrada con ID: " + id));
 
-        validateTaskRequest(request);
+        // No full validation needed for partial update
 
-        task.setTitle(request.getTitle());
-        task.setDescription(request.getDescription());
-        task.setEstimatedHours(request.getEstimatedHours());
-        task.setActualHours(request.getActualHours());
-        task.setStartDate(request.getStartDate());
-        task.setDueDate(request.getDueDate());
-        task.setCompletedDate(request.getCompletedDate());
+        if (request.getTitle() != null)
+            task.setTitle(request.getTitle());
+        if (request.getDescription() != null)
+            task.setDescription(request.getDescription());
+        if (request.getEstimatedHours() != null)
+            task.setEstimatedHours(request.getEstimatedHours());
+        if (request.getActualHours() != null)
+            task.setActualHours(request.getActualHours());
+        if (request.getStartDate() != null)
+            task.setStartDate(request.getStartDate());
+        if (request.getDueDate() != null)
+            task.setDueDate(request.getDueDate());
+        if (request.getCompletedDate() != null)
+            task.setCompletedDate(request.getCompletedDate());
 
         // Actualizar proyecto
         if (request.getProjectId() != null) {
             Project project = projectRepository.findById(request.getProjectId())
-                    .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID: " + request.getProjectId()));
+                    .orElseThrow(
+                            () -> new RuntimeException("Proyecto no encontrado con ID: " + request.getProjectId()));
             task.setProject(project);
         }
 
         // Actualizar usuario asignado
         if (request.getAssignedToId() != null) {
             User user = userRepository.findById(request.getAssignedToId())
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + request.getAssignedToId()));
+                    .orElseThrow(
+                            () -> new RuntimeException("Usuario no encontrado con ID: " + request.getAssignedToId()));
             task.setAssignedTo(user);
         }
 
@@ -227,7 +239,8 @@ public class TaskService {
             throw new RuntimeException("El ID del proyecto es obligatorio");
         }
 
-        if (request.getEstimatedHours() != null && request.getEstimatedHours().compareTo(java.math.BigDecimal.ZERO) < 0) {
+        if (request.getEstimatedHours() != null
+                && request.getEstimatedHours().compareTo(java.math.BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Las horas estimadas deben ser mayor o igual a 0");
         }
 
@@ -235,9 +248,9 @@ public class TaskService {
             throw new RuntimeException("Las horas actuales deben ser mayor o igual a 0");
         }
 
-        if (request.getDueDate() != null && request.getStartDate() != null && 
-            request.getDueDate().isBefore(request.getStartDate())) {
+        if (request.getDueDate() != null && request.getStartDate() != null &&
+                request.getDueDate().isBefore(request.getStartDate())) {
             throw new RuntimeException("La fecha de vencimiento no puede ser anterior a la fecha de inicio");
         }
     }
-} 
+}

@@ -95,7 +95,7 @@ spring:
 # =====================================================
 server:
   # Puerto donde se ejecutará la aplicación
-  port: 8080
+  port: ${PORT:8080}
 
 # =====================================================
 # CONFIGURACIÓN SWAGGER/OPENAPI

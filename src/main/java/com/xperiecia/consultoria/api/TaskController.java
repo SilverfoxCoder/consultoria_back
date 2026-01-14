@@ -51,7 +51,8 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @Valid @RequestBody CreateTaskRequest request) {
+    public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id,
+            @RequestBody com.xperiecia.consultoria.dto.UpdateTaskRequest request) {
         TaskDTO updatedTask = taskService.updateTask(id, request);
         return ResponseEntity.ok(updatedTask);
     }
@@ -176,4 +177,4 @@ public class TaskController {
         Double total = taskService.getTotalActualHoursByProject(projectId);
         return ResponseEntity.ok(total);
     }
-} 
+}

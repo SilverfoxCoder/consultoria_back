@@ -38,6 +38,12 @@ public class ProjectService {
     @Autowired
     private TimeEntryRepository timeEntryRepository;
 
+    @Autowired
+    private com.xperiecia.consultoria.domain.ProjectCommentRepository projectCommentRepository;
+
+    @Autowired
+    private com.xperiecia.consultoria.domain.UserRepository userRepository;
+
     // Obtener todos los proyectos
     public List<ProjectDTO> getAllProjects() {
         return projectRepository.findAll()
@@ -207,7 +213,96 @@ public class ProjectService {
         return stats;
     }
 
-    // Validaciones
+    // --- Gestión de Tareas ---
+
+    public List<com.xperiecia.consultoria.dto.TaskDTO> getTasksByProject(Long projectId) {
+        return taskRepository.findByProjectId(projectId).stream()
+                .map(com.xperiecia.consultoria.dto.TaskDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    // --- Gestión de Comentarios ---
+
+    public List<com.xperiecia.consultoria.dto.ProjectCommentDTO> getProjectComments(Long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new RuntimeException("Proyecto no encontrado con ID: " + projectId);
+        }
+        return projectCommentRepository.findByProjectIdOrderByCreatedAtDesc(projectId).stream()
+                .map(com.xperiecia.consultoria.dto.ProjectCommentDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public com.xperiecia.consultoria.dto.ProjectCommentDTO addProjectComment(Long projectId, String content,
+            Long userId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID: " + projectId));
+
+        com.xperiecia.consultoria.domain.User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+
+        com.xperiecia.consultoria.domain.ProjectComment comment = new com.xperiecia.consultoria.domain.ProjectComment();
+        comment.setProject(project);
+        comment.setUser(user);
+        comment.setContent(content);
+
+        com.xperiecia.consultoria.domain.ProjectComment savedComment = projectCommentRepository.save(comment);
+        return com.xperiecia.consultoria.dto.ProjectCommentDTO.fromEntity(savedComment);
+    }
+
+    public com.xperiecia.consultoria.dto.TaskDTO createTaskForProject(Long projectId,
+            com.xperiecia.consultoria.dto.CreateTaskRequest request) {
+        // Enforce project ID
+        request.setProjectId(projectId);
+
+        // This relies on TaskService or we implement logic here.
+        // Better to duplicate simple logic to avoid circular dependency if TaskService
+        // injects ProjectService (it doesn't seem to, but better safe).
+        // Actually, ProjectService injects TaskRepository. We can use it.
+
+        com.xperiecia.consultoria.domain.Task task = new com.xperiecia.consultoria.domain.Task();
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription()); // might be null
+        task.setStartDate(request.getStartDate());
+        task.setDueDate(request.getDueDate());
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado"));
+        task.setProject(project);
+
+        if (request.getAssignedToId() != null) {
+            com.xperiecia.consultoria.domain.User user = userRepository.findById(request.getAssignedToId())
+                    .orElseThrow(() -> new RuntimeException("Usuario asignado no encontrado"));
+            task.setAssignedTo(user);
+        }
+
+        // Default status
+        task.setStatus(com.xperiecia.consultoria.domain.Task.TaskStatus.PENDIENTE);
+
+        com.xperiecia.consultoria.domain.Task savedTask = taskRepository.save(task);
+        return com.xperiecia.consultoria.dto.TaskDTO.fromEntity(savedTask);
+    }
+
+    // --- Reportes ---
+
+    public com.xperiecia.consultoria.dto.ProjectReportDTO getProjectReport(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID: " + projectId));
+
+        List<com.xperiecia.consultoria.domain.Task> tasks = taskRepository.findByProjectId(projectId);
+        long totalTasks = tasks.size();
+        long completedTasks = tasks.stream()
+                .filter(t -> com.xperiecia.consultoria.domain.Task.TaskStatus.COMPLETADA.equals(t.getStatus()))
+                .count();
+
+        return com.xperiecia.consultoria.dto.ProjectReportDTO.builder()
+                .efficiency(project.getEfficiencyScore())
+                .hoursLogged(project.getHoursLogged())
+                .completedTasks(completedTasks)
+                .totalTasks(totalTasks)
+                .summary(project.getExecutiveSummary())
+                .build();
+    }
+
     private void validateProjectRequest(CreateProjectRequest request) {
         if (request.getEndDate().isBefore(request.getStartDate())) {
             throw new RuntimeException("La fecha de fin debe ser posterior a la fecha de inicio");

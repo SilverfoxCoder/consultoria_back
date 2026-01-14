@@ -240,4 +240,52 @@ public class ProjectController {
         Map<String, Object> stats = projectService.getProjectStats();
         return ResponseEntity.ok(stats);
     }
+
+    // --- Endpoints para Tareas del Proyecto ---
+
+    @GetMapping("/{id}/tasks")
+    @Operation(summary = "Obtener tareas de un proyecto")
+    public ResponseEntity<List<com.xperiecia.consultoria.dto.TaskDTO>> getProjectTasks(@PathVariable Long id) {
+        return ResponseEntity.ok(projectService.getTasksByProject(id));
+    }
+
+    @PostMapping("/{id}/tasks")
+    @Operation(summary = "Crear tarea para un proyecto")
+    public ResponseEntity<com.xperiecia.consultoria.dto.TaskDTO> createProjectTask(
+            @PathVariable Long id,
+            @RequestBody com.xperiecia.consultoria.dto.CreateTaskRequest request) {
+        return ResponseEntity.ok(projectService.createTaskForProject(id, request));
+    }
+
+    // --- Endpoints para Comentarios del Proyecto ---
+
+    @GetMapping("/{id}/comments")
+    @Operation(summary = "Obtener comentarios de un proyecto")
+    public ResponseEntity<List<com.xperiecia.consultoria.dto.ProjectCommentDTO>> getProjectComments(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(projectService.getProjectComments(id));
+    }
+
+    @PostMapping("/{id}/comments")
+    @Operation(summary = "Agregar comentario a un proyecto")
+    public ResponseEntity<com.xperiecia.consultoria.dto.ProjectCommentDTO> addProjectComment(
+            @PathVariable Long id,
+            @RequestBody com.xperiecia.consultoria.dto.CreateProjectCommentRequest request,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+
+        // Fallback for userId if not provided in header (for dev/test)
+        if (userId == null) {
+            userId = 1L; // Assuming ID 1 exists (admin)
+        }
+
+        return ResponseEntity.ok(projectService.addProjectComment(id, request.getText(), userId));
+    }
+
+    // --- Endpoints para Reportes ---
+
+    @GetMapping("/{id}/report")
+    @Operation(summary = "Obtener reporte de proyecto")
+    public ResponseEntity<com.xperiecia.consultoria.dto.ProjectReportDTO> getProjectReport(@PathVariable Long id) {
+        return ResponseEntity.ok(projectService.getProjectReport(id));
+    }
 }
