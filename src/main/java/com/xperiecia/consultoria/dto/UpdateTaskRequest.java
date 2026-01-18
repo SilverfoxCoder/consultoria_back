@@ -15,6 +15,7 @@ public class UpdateTaskRequest {
     private String description;
     private Long projectId;
     private Long assignedToId;
+    private String assignee;
     private String status;
     private String priority;
     private BigDecimal estimatedHours;

@@ -66,12 +66,17 @@ public class TaskService {
             task.setProject(project);
         }
 
-        // Establecer usuario asignado
+        // Establecer usuario asignado (opcional)
         if (request.getAssignedToId() != null) {
             User user = userRepository.findById(request.getAssignedToId())
                     .orElseThrow(
                             () -> new RuntimeException("Usuario no encontrado con ID: " + request.getAssignedToId()));
             task.setAssignedTo(user);
+        }
+
+        // Establecer asignado (texto libre)
+        if (request.getAssignee() != null) {
+            task.setAssignee(request.getAssignee());
         }
 
         // Establecer status
@@ -108,6 +113,8 @@ public class TaskService {
             task.setDueDate(request.getDueDate());
         if (request.getCompletedDate() != null)
             task.setCompletedDate(request.getCompletedDate());
+        if (request.getAssignee() != null)
+            task.setAssignee(request.getAssignee());
 
         // Actualizar proyecto
         if (request.getProjectId() != null) {

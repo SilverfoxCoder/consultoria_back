@@ -24,6 +24,8 @@ public class CreateTaskRequest {
 
     private Long assignedToId;
 
+    private String assignee;
+
     private String status = "PENDIENTE"; // Valor por defecto
 
     private String priority = "MEDIA"; // Valor por defecto

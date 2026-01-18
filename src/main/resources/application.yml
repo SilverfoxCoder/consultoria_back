@@ -25,8 +25,8 @@ spring:
   jpa:
     hibernate:
       # update: Actualizar esquema automáticamente
-      # none: No modificar esquema (para producción)
-      ddl-auto: update
+      # none: No modificar esquema (para producción o evitar validaciones estrictas)
+      ddl-auto: none
     # Mostrar SQL en logs para debugging
     show-sql: true
     properties:

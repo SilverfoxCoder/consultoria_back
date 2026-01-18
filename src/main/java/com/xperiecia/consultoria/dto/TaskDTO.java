@@ -20,6 +20,7 @@ public class TaskDTO {
     private String projectName;
     private Long assignedToId;
     private String assignedToName;
+    private String assignee;
     private String status;
     private String statusDisplay;
     private String priority;
@@ -42,6 +43,7 @@ public class TaskDTO {
         dto.setProjectName(task.getProject() != null ? task.getProject().getName() : null);
         dto.setAssignedToId(task.getAssignedTo() != null ? task.getAssignedTo().getId() : null);
         dto.setAssignedToName(task.getAssignedTo() != null ? task.getAssignedTo().getName() : null);
+        dto.setAssignee(task.getAssignee());
         dto.setStatus(task.getStatus() != null ? task.getStatus().name() : null);
         dto.setStatusDisplay(task.getStatus() != null ? task.getStatus().getDisplayName() : null);
         dto.setPriority(task.getPriority() != null ? task.getPriority().name() : null);

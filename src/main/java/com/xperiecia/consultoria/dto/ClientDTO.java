@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -14,6 +16,7 @@ import java.time.LocalDate;
 public class ClientDTO {
     private Long id;
     private String name;
+    @JsonAlias("contact_person")
     private String contactPerson;
     private String email;
     private String phone;
@@ -23,8 +26,11 @@ public class ClientDTO {
     private String address;
     private String website;
     private String notes;
+    @JsonAlias("last_contact")
     private LocalDate lastContact;
+    @JsonAlias("total_revenue")
     private BigDecimal totalRevenue;
+    @JsonAlias("total_projects")
     private Integer totalProjects;
 
     // Constructor from Entity

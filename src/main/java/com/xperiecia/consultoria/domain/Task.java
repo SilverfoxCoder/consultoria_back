@@ -34,11 +34,14 @@ public class Task {
     @JoinColumn(name = "assigned_to_id")
     private User assignedTo;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = TaskStatusConverter.class)
     @Column(name = "status")
     private TaskStatus status = TaskStatus.PENDIENTE;
 
-    @Enumerated(EnumType.STRING)
+    @Column(name = "assignee")
+    private String assignee;
+
+    @Convert(converter = TaskPriorityConverter.class)
     @Column(name = "priority")
     private TaskPriority priority = TaskPriority.MEDIA;
 
@@ -108,5 +111,50 @@ public class Task {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    @Converter
+    public static class TaskStatusConverter implements AttributeConverter<TaskStatus, String> {
+        @Override
+        public String convertToDatabaseColumn(TaskStatus attribute) {
+            return attribute == null ? null : attribute.name();
+        }
+
+        @Override
+        public TaskStatus convertToEntityAttribute(String dbData) {
+            if (dbData == null) return null;
+            // Normalize: uppercase and replace spaces with underscores
+            String normalized = dbData.trim().toUpperCase().replace(" ", "_");
+            try {
+                return TaskStatus.valueOf(normalized);
+            } catch (IllegalArgumentException e) {
+                // Handle legacy/mismatched values gracefully
+                if (normalized.equals("COMPLETADO")) return TaskStatus.COMPLETADA;
+                if (normalized.contains("PROGRESO")) return TaskStatus.EN_PROGRESO;
+                return TaskStatus.PENDIENTE; // Default fallback
+            }
+        }
+    }
+
+    @Converter
+    public static class TaskPriorityConverter implements AttributeConverter<TaskPriority, String> {
+        @Override
+        public String convertToDatabaseColumn(TaskPriority attribute) {
+            return attribute == null ? null : attribute.name();
+        }
+
+        @Override
+        public TaskPriority convertToEntityAttribute(String dbData) {
+            if (dbData == null) return null;
+            // Normalize: uppercase
+            String normalized = dbData.trim().toUpperCase();
+            try {
+                return TaskPriority.valueOf(normalized);
+            } catch (IllegalArgumentException e) {
+                // Handle legacy/mismatched values gracefully
+                 if (normalized.equals("CRÍTICA") || normalized.equals("CRITICA")) return TaskPriority.CRITICA;
+                return TaskPriority.MEDIA; // Default fallback
+            }
+        }
     }
 }
