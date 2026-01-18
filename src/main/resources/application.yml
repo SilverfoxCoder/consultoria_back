@@ -45,8 +45,8 @@ spring:
     user: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:TnSf2024@.@}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    # Deshabilitado temporalmente para evitar conflictos con Hibernate
-    enabled: false
+    # Habilitado para crear tablas en Back4App/Railway
+    enabled: true
     # Ubicación de los archivos de migración
     locations: classpath:db/migration
     # Crear línea base si no existe
@@ -89,7 +89,7 @@ spring:
     user: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:TnSf2024@.@}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    enabled: false
+    enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
 
