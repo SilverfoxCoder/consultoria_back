@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -101,7 +102,7 @@ public class TimeEntry {
         if (startTime != null && endTime != null) {
             long minutes = java.time.Duration.between(startTime, endTime).toMinutes();
             this.durationHours = BigDecimal.valueOf(minutes).divide(BigDecimal.valueOf(60), 2,
-                    BigDecimal.ROUND_HALF_UP);
+                    RoundingMode.HALF_UP);
         }
     }
 

@@ -1,7 +1,6 @@
 package com.xperiecia.consultoria.dto;
 
 import com.xperiecia.consultoria.domain.Invoice;
-import com.xperiecia.consultoria.domain.InvoiceItem;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;

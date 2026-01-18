@@ -7,6 +7,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.lang.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -72,8 +73,9 @@ public class CorsConfig implements WebMvcConfigurer {
          * 
          * @param registry Registro de configuración CORS
          */
+        @SuppressWarnings("null")
         @Override
-        public void addCorsMappings(CorsRegistry registry) {
+        public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**") // Aplicar a todos los endpoints
                                 .allowedOrigins(ALLOWED_ORIGINS.toArray(new String[0])) // Frontend específico
                                 .allowedMethods(ALLOWED_METHODS.toArray(new String[0]))
