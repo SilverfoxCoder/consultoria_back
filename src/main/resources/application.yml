@@ -33,6 +33,8 @@ spring:
       hibernate:
         # Formatear SQL para mejor legibilidad en logs
         format_sql: true
+        # Dialecto explícito para evitar error "Unable to determine Dialect"
+        dialect: org.hibernate.dialect.MySQLDialect
         
   # =====================================================
   # CONFIGURACIÓN FLYWAY (MIGRACIONES)
@@ -80,6 +82,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
         
   flyway:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/codethics?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
