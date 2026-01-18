@@ -59,6 +59,9 @@ public class ClientController {
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar un cliente")
     public ResponseEntity<ClientDTO> updateClient(@PathVariable Long id, @RequestBody ClientDTO clientDetails) {
+        System.out.println("Updating Client ID: " + id);
+        System.out.println("Payload Website: " + clientDetails.getWebsite());
+        System.out.println("Payload Full: " + clientDetails);
         Optional<Client> client = clientRepository.findById(id);
         if (client.isPresent()) {
             Client updatedClient = client.get();
