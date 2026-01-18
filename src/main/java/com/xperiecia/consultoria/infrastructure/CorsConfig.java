@@ -54,7 +54,8 @@ public class CorsConfig implements WebMvcConfigurer {
                                                         "http://localhost:5174",
                                                         "https://localhost:5174",
                                                         "http://127.0.0.1:5174",
-                                                        "https://127.0.0.1:5174");
+                                                        "https://127.0.0.1:5174",
+                                                        "https://xperiecia-consulting.vercel.app");
 
         private static final List<String> ALLOWED_METHODS = Arrays.asList(
                         "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "TRACE", "CONNECT");
