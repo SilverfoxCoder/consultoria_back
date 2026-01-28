@@ -39,23 +39,39 @@ public class CorsConfig implements WebMvcConfigurer {
         // Obtener orígenes permitidos desde variable de entorno o usar defaults
         private static final String ENV_ALLOWED_ORIGINS = System.getenv("CORS_ALLOWED_ORIGINS");
 
-        private static final List<String> ALLOWED_ORIGINS = ENV_ALLOWED_ORIGINS != null
-                        && !ENV_ALLOWED_ORIGINS.isEmpty()
-                                        ? Arrays.asList(ENV_ALLOWED_ORIGINS.split(","))
-                                        : Arrays.asList(
-                                                        "http://localhost:3000",
-                                                        "https://localhost:3000",
-                                                        "http://127.0.0.1:3000",
-                                                        "https://127.0.0.1:3000",
-                                                        "http://localhost:5173",
-                                                        "https://localhost:5173",
-                                                        "http://127.0.0.1:5173",
-                                                        "https://127.0.0.1:5173",
-                                                        "http://localhost:5174",
-                                                        "https://localhost:5174",
-                                                        "http://127.0.0.1:5174",
-                                                        "https://127.0.0.1:5174",
-                                                        "https://xperiecia-consulting.vercel.app");
+        // Helper method to merge env vars with defaults
+        private static List<String> getAllowedOrigins() {
+                List<String> origins = new java.util.ArrayList<>();
+
+                // Add Env vars if present
+                if (ENV_ALLOWED_ORIGINS != null && !ENV_ALLOWED_ORIGINS.isEmpty()) {
+                        origins.addAll(Arrays.asList(ENV_ALLOWED_ORIGINS.split(",")));
+                }
+
+                // Add defaults (Localhost)
+                List<String> defaults = Arrays.asList(
+                                "http://localhost:3000",
+                                "https://localhost:3000",
+                                "http://127.0.0.1:3000",
+                                "https://127.0.0.1:3000",
+                                "http://localhost:5173",
+                                "https://localhost:5173",
+                                "http://127.0.0.1:5173",
+                                "https://127.0.0.1:5173",
+                                "http://localhost:5174",
+                                "https://localhost:5174",
+                                "http://127.0.0.1:5174",
+                                "https://127.0.0.1:5174",
+                                "https://xperiecia-consulting.vercel.app",
+                                "https://xperiecia.com",
+                                "https://www.xperiecia.com",
+                                "http://xperiecia.com");
+
+                origins.addAll(defaults);
+                return origins;
+        }
+
+        private static final List<String> ALLOWED_ORIGINS = getAllowedOrigins();
 
         private static final List<String> ALLOWED_METHODS = Arrays.asList(
                         "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "TRACE", "CONNECT");
