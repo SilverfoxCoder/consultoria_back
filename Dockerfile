@@ -14,5 +14,5 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jdk-alpine
 VOLUME /tmp
 COPY --from=build /app/target/*.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java", "-Xmx400m", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]
 EXPOSE 8080
