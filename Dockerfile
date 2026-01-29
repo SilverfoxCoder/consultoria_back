@@ -11,8 +11,8 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application
-FROM eclipse-temurin:17-jre-jammy
+FROM amazoncorretto:17
 VOLUME /tmp
 COPY --from=build /app/target/*.jar app.jar
-ENTRYPOINT ["/bin/sh", "-c", "echo '🚀 [SHELL] Container started. Launching Java...'; exec java -Xms128m -Xmx256m -Djava.security.egd=file:/dev/./urandom -jar /app.jar"]
+ENTRYPOINT ["java", "-Xms128m", "-Xmx256m", "-jar", "/app.jar"]
 EXPOSE 8080
