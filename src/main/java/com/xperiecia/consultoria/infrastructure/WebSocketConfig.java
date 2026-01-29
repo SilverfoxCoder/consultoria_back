@@ -29,16 +29,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
         // Endpoint WebSocket con SockJS para compatibilidad
         registry.addEndpoint("/ws/notifications")
-                .setAllowedOrigins("http://localhost:3000")
+                .setAllowedOriginPatterns("*") // Permitir todos los orígenes en producción (o especificar lista)
                 .withSockJS();
 
         // Endpoint WebSocket nativo
         registry.addEndpoint("/ws/notifications")
-                .setAllowedOrigins("http://localhost:3000");
+                .setAllowedOriginPatterns("*"); // Permitir todos los orígenes en producción
 
-        System.out.println("🔌 WebSocket endpoints registrados:");
-        System.out.println("   - /ws/notifications (con SockJS)");
-        System.out.println("   - /ws/notifications (nativo)");
-        System.out.println("   - Permitido origen: http://localhost:3000");
+        System.out.println("🔌 WebSocket endpoints registrados con CORS abierto (*)");
     }
 }
