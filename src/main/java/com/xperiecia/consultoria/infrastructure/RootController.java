@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-public class HealthController {
+public class RootController {
 
     @GetMapping("/")
-    public ResponseEntity<Map<String, String>> healthCheck() {
+    public ResponseEntity<Map<String, String>> rootHealthCheck() {
         return ResponseEntity.ok(Map.of("status", "UP", "message", "Application is running"));
     }
 }
