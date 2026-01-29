@@ -11,7 +11,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:17-jre-jammy
 VOLUME /tmp
 COPY --from=build /app/target/*.jar app.jar
 ENTRYPOINT ["java", "-Xmx400m", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]

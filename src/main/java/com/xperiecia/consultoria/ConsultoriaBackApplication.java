@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class ConsultoriaBackApplication {
     public static void main(String[] args) {
+        System.out.println("🚀 [STARTUP] Application starting... Force logging check.");
         SpringApplication.run(ConsultoriaBackApplication.class, args);
     }
 }
