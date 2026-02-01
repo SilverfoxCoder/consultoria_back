@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 import com.xperiecia.consultoria.domain.ProjectTeamRepository;
 import com.xperiecia.consultoria.domain.TaskRepository;
 import com.xperiecia.consultoria.domain.TimeEntryRepository;
+import com.xperiecia.consultoria.domain.User;
+import com.xperiecia.consultoria.domain.ProjectTeam;
 
 @Service
 @Transactional
@@ -84,7 +86,40 @@ public class ProjectService {
         project.setJiraProjectKey(request.getJiraProjectKey());
         project.setJiraBoardId(request.getJiraBoardId());
 
+        project.setJiraBoardId(request.getJiraBoardId());
+
         Project savedProject = projectRepository.save(project);
+
+        // Asignar miembros del equipo si se proporcionan IDs
+        if (request.getTeamMemberIds() != null && !request.getTeamMemberIds().isEmpty()) {
+            for (Long userId : request.getTeamMemberIds()) {
+                try {
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+
+                    ProjectTeam teamMember = new ProjectTeam();
+                    teamMember.setProject(savedProject);
+                    teamMember.setName(user.getName()); // Usamos el nombre del usuario
+                    teamMember.setRole("Consultor"); // Rol por defecto
+                    // No tenemos un campo 'userId' o relación directa 'User' en ProjectTeam según
+                    // la entidad vista,
+                    // pero ProjectTeam tiene 'name' y 'role'.
+                    // REVISIÓN: La entidad ProjectTeam mostrada anteriormente tenía:
+                    // private Project project;
+                    // private String name;
+                    // private String role;
+                    // NO tiene relación directa con User. Esto es una limitación del diseño actual.
+                    // Sin embargo, para cumplir el requerimiento, guardaremos el nombre del
+                    // usuario.
+
+                    projectTeamRepository.save(teamMember);
+                } catch (Exception e) {
+                    System.err.println("Error asignando usuario " + userId + " al proyecto: " + e.getMessage());
+                    // Continuamos con los siguientes
+                }
+            }
+        }
+
         return ProjectDTO.fromEntity(savedProject);
     }
 
@@ -115,6 +150,34 @@ public class ProjectService {
         project.setJiraBoardId(request.getJiraBoardId());
 
         Project updatedProject = projectRepository.save(project);
+
+        // Actualizar miembros del equipo si se proporcionan IDs
+        // Nota: Esto reemplazará los miembros existentes si se envía la lista.
+        // Si la lista es null, NO se tocan los miembros existentes.
+        // Si la lista está vacía, se eliminan todos (opcional, aquí asumiremos que []
+        // limpia el equipo).
+        if (request.getTeamMemberIds() != null) {
+            // Eliminar miembros actuales
+            projectTeamRepository.deleteByProjectId(id);
+
+            // Agregar nuevos
+            for (Long userId : request.getTeamMemberIds()) {
+                try {
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+
+                    ProjectTeam teamMember = new ProjectTeam();
+                    teamMember.setProject(updatedProject);
+                    teamMember.setName(user.getName());
+                    teamMember.setRole("Consultor");
+
+                    projectTeamRepository.save(teamMember);
+                } catch (Exception e) {
+                    System.err.println("Error asignando usuario " + userId + " al proyecto: " + e.getMessage());
+                }
+            }
+        }
+
         return ProjectDTO.fromEntity(updatedProject);
     }
 
