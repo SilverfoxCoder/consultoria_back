@@ -257,7 +257,7 @@ public class AuthController {
                 System.out.println("✅ Nuevo usuario creado y autenticado: " + email + " con rol: " + role);
 
                 // Si el rol es 'client', crear automáticamente la entrada en la tabla clients
-                if ("client".equals(role)) {
+                if ("client".equalsIgnoreCase(role) || "cliente".equalsIgnoreCase(role)) {
                     getOrCreateClientForUser(user);
                 }
 
@@ -371,7 +371,7 @@ public class AuthController {
                 System.out.println("✅ Nuevo usuario creado: " + email + " con rol: " + role);
 
                 // Si el rol es 'client', crear automáticamente la entrada en la tabla clients
-                if ("client".equals(role)) {
+                if ("client".equalsIgnoreCase(role) || "cliente".equalsIgnoreCase(role)) {
                     getOrCreateClientForUser(user);
                 }
 
@@ -514,7 +514,7 @@ public class AuthController {
      * @return ID del cliente o null si no aplica
      */
     private Long resolveClientId(User user) {
-        if ("client".equals(user.getRole())) {
+        if ("client".equalsIgnoreCase(user.getRole()) || "cliente".equalsIgnoreCase(user.getRole())) {
             Optional<Client> clientOpt = clientRepository.findByEmail(user.getEmail());
             Client client = clientOpt.orElseGet(() -> getOrCreateClientForUser(user));
             return client != null ? client.getId() : null;
@@ -576,7 +576,7 @@ public class AuthController {
             User user = userOptional.get();
 
             // Si el usuario tiene rol 'client', también eliminar de la tabla clients
-            if ("client".equals(user.getRole())) {
+            if ("client".equalsIgnoreCase(user.getRole()) || "cliente".equalsIgnoreCase(user.getRole())) {
                 clientRepository.findAll().stream()
                         .filter(client -> client.getEmail().equals(user.getEmail()))
                         .findFirst()
