@@ -57,6 +57,89 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     /**
+     * Registrar un nuevo usuario
+     * 
+     * @param request Datos del usuario a registrar
+     * @return Respuesta con el usuario registrado o error
+     */
+    @PostMapping("/register")
+    @Operation(summary = "Registrar nuevo usuario")
+    public ResponseEntity<LoginResponse> register(
+            @RequestBody com.xperiecia.consultoria.dto.RegisterUserRequest request) {
+        try {
+            // Validar que el email no exista
+            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+                LoginResponse response = new LoginResponse();
+                response.setSuccess(false);
+                response.setMessage("El email ya está registrado");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Crear nuevo usuario
+            User newUser = new User();
+            newUser.setName(request.getName());
+            newUser.setEmail(request.getEmail());
+            newUser.setPhone(request.getPhone());
+
+            // Hashear contraseña
+            newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+
+            // Asignar rol (por defecto CLIENT si no se especifica, o forzar CLIENT para
+            // registros públicos)
+            // Aquí permitimos que el front envíe el rol, pero podríamos restringirlo
+            String role = request.getRole();
+            if (role == null || role.trim().isEmpty()) {
+                role = "CLIENT";
+            }
+            newUser.setRole(role);
+            newUser.setStatus("active");
+            newUser.setRegisteredAt(LocalDateTime.now());
+
+            User savedUser = userRepository.save(newUser);
+            System.out.println("✅ Nuevo usuario registrado: " + savedUser.getEmail() + " con rol: " + role);
+
+            // Si es cliente, crear entidad Client
+            Long clientId = null;
+            if ("CLIENT".equalsIgnoreCase(role) || "CLIENTE".equalsIgnoreCase(role)) {
+                Client client = getOrCreateClientForUser(savedUser);
+                if (client != null) {
+                    clientId = client.getId();
+                }
+            }
+
+            // Enviar notificación de bienvenida
+            notificationService.createWelcomeNotification(savedUser.getId(), savedUser.getName());
+
+            // Notificar admins
+            adminNotificationService.notifyNewUserRegistration(savedUser);
+
+            // Auto-login (retornar token)
+            LoginResponse response = new LoginResponse();
+            response.setSuccess(true);
+            response.setMessage("Registro exitoso");
+            response.setToken("token_" + savedUser.getId() + "_" + System.currentTimeMillis());
+
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", savedUser.getId());
+            userMap.put("name", savedUser.getName());
+            userMap.put("email", savedUser.getEmail());
+            userMap.put("role", savedUser.getRole());
+            userMap.put("clientId", clientId);
+
+            response.setUser(userMap);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error en registro: " + e.getMessage());
+            LoginResponse response = new LoginResponse();
+            response.setSuccess(false);
+            response.setMessage("Error en el servidor: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
      * Autenticar usuario con email y contraseña
      * 
      * @param loginRequest Datos de login (email, password)
