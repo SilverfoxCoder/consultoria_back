@@ -6,6 +6,7 @@ import com.xperiecia.consultoria.dto.UserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,9 +20,11 @@ import java.util.HashMap;
 @Tag(name = "Users", description = "API para gestión de usuarios")
 public class UserController {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping
@@ -52,6 +55,15 @@ public class UserController {
     @Operation(summary = "Crear un nuevo usuario")
     public UserDTO createUser(@RequestBody UserDTO userDTO) {
         User user = userDTO.toEntity();
+
+        // Hash password if present
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
+            user.setPasswordHash(passwordEncoder.encode(userDTO.getPassword()));
+        } else if (user.getPasswordHash() == null) {
+            // Fallback or error if necessary, but for now allow it (or maybe set default?)
+            // user.setPasswordHash(passwordEncoder.encode("defaultPassword"));
+        }
+
         User savedUser = userRepository.save(user);
         return UserDTO.fromEntity(savedUser);
     }
@@ -77,7 +89,8 @@ public class UserController {
 
     @PatchMapping("/{id}/status")
     @Operation(summary = "Cambiar estado de un usuario")
-    public ResponseEntity<Map<String, Object>> updateUserStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, Object>> updateUserStatus(@PathVariable Long id,
+            @RequestBody Map<String, String> request) {
         try {
             Optional<User> userOptional = userRepository.findById(id);
             if (userOptional.isEmpty()) {
@@ -86,29 +99,29 @@ public class UserController {
                 response.put("message", "Usuario no encontrado");
                 return ResponseEntity.notFound().build();
             }
-            
+
             User user = userOptional.get();
             String newStatus = request.get("status");
-            
+
             if (newStatus == null || newStatus.trim().isEmpty()) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
                 response.put("message", "Estado requerido");
                 return ResponseEntity.badRequest().body(response);
             }
-            
+
             user.setStatus(newStatus);
             userRepository.save(user);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Estado del usuario actualizado a: " + newStatus);
             response.put("id", id);
             response.put("newStatus", newStatus);
-            
+
             System.out.println("✅ Estado del usuario " + user.getName() + " cambiado a: " + newStatus);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             System.err.println("❌ Error cambiando estado del usuario: " + e.getMessage());
             Map<String, Object> response = new HashMap<>();
@@ -129,9 +142,9 @@ public class UserController {
             response.put("id", id);
             return ResponseEntity.notFound().build();
         }
-        
+
         User user = userOptional.get();
-        
+
         try {
             userRepository.deleteById(id);
             Map<String, Object> response = new HashMap<>();
@@ -139,23 +152,23 @@ public class UserController {
             response.put("deletionType", "physical");
             response.put("id", id);
             response.put("success", true);
-            
+
             System.out.println("🗑️ Usuario eliminado físicamente: " + user.getName());
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             String errorMessage = e.getMessage().toLowerCase();
-            boolean isForeignKeyConstraint = errorMessage.contains("foreign key constraint") || 
-                                           errorMessage.contains("constraint fails") ||
-                                           errorMessage.contains("cannot delete") ||
-                                           errorMessage.contains("referential integrity");
-            
+            boolean isForeignKeyConstraint = errorMessage.contains("foreign key constraint") ||
+                    errorMessage.contains("constraint fails") ||
+                    errorMessage.contains("cannot delete") ||
+                    errorMessage.contains("referential integrity");
+
             if (isForeignKeyConstraint) {
                 // Aplicar eliminación lógica automáticamente
                 try {
                     user.setStatus("deleted");
                     userRepository.save(user);
-                    
+
                     Map<String, Object> response = new HashMap<>();
                     response.put("message", "Usuario eliminado lógicamente debido a restricciones de integridad");
                     response.put("deletionType", "logical");
@@ -163,10 +176,10 @@ public class UserController {
                     response.put("id", id);
                     response.put("success", true);
                     response.put("newStatus", "deleted");
-                    
+
                     System.out.println("🔄 Usuario eliminado lógicamente por foreign key: " + user.getName());
                     return ResponseEntity.ok(response);
-                    
+
                 } catch (Exception logicalDeleteError) {
                     Map<String, Object> response = new HashMap<>();
                     response.put("message", "Error en eliminación lógica: " + logicalDeleteError.getMessage());
@@ -182,7 +195,7 @@ public class UserController {
                 response.put("error", e.getMessage());
                 response.put("success", false);
                 response.put("id", id);
-                
+
                 System.err.println("❌ Error eliminando usuario " + user.getName() + ": " + e.getMessage());
                 return ResponseEntity.badRequest().body(response);
             }
@@ -200,9 +213,9 @@ public class UserController {
                 response.put("message", "Usuario no encontrado");
                 return ResponseEntity.notFound().build();
             }
-            
+
             User user = userOptional.get();
-            
+
             if (!"deleted".equals(user.getStatus())) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
@@ -210,20 +223,20 @@ public class UserController {
                 response.put("currentStatus", user.getStatus());
                 return ResponseEntity.badRequest().body(response);
             }
-            
+
             user.setStatus("active");
             userRepository.save(user);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Usuario restaurado correctamente");
             response.put("id", id);
             response.put("previousStatus", "deleted");
             response.put("newStatus", "active");
-            
+
             System.out.println("🔄 Usuario restaurado: " + user.getName());
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             System.err.println("❌ Error restaurando usuario: " + e.getMessage());
             Map<String, Object> response = new HashMap<>();
@@ -238,16 +251,16 @@ public class UserController {
     public ResponseEntity<List<UserDTO>> getUsersByStatus(@PathVariable String status) {
         try {
             List<User> users = userRepository.findAll().stream()
-                .filter(user -> status.equals(user.getStatus()))
-                .collect(Collectors.toList());
-                
+                    .filter(user -> status.equals(user.getStatus()))
+                    .collect(Collectors.toList());
+
             List<UserDTO> userDTOs = users.stream()
-                .map(UserDTO::fromEntity)
-                .collect(Collectors.toList());
-                
+                    .map(UserDTO::fromEntity)
+                    .collect(Collectors.toList());
+
             System.out.println("📋 Encontrados " + users.size() + " usuarios con estado: " + status);
             return ResponseEntity.ok(userDTOs);
-            
+
         } catch (Exception e) {
             System.err.println("❌ Error obteniendo usuarios por estado: " + e.getMessage());
             return ResponseEntity.internalServerError().build();

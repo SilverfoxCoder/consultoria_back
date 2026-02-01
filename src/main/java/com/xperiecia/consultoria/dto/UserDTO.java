@@ -22,6 +22,7 @@ public class UserDTO {
     private String phone;
     private LocalDateTime registeredAt;
     private String status;
+    private String password;
     private List<Long> roleIds; // Solo IDs de roles para evitar recursión
 
     // Constructor from Entity
