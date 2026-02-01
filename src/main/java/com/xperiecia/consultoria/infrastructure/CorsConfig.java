@@ -65,7 +65,10 @@ public class CorsConfig implements WebMvcConfigurer {
                                 "https://xperiecia-consulting.vercel.app",
                                 "https://xperiecia.com",
                                 "https://www.xperiecia.com",
-                                "http://xperiecia.com");
+                                "http://xperiecia.com",
+                                "https://xperiecia.es",
+                                "https://www.xperiecia.es",
+                                "http://xperiecia.es");
 
                 origins.addAll(defaults);
                 return origins;
