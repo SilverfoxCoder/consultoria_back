@@ -183,7 +183,7 @@ public class ProjectService {
     // Obtener proyectos por cliente (ahora es User)
     public List<ProjectDTO> getProjectsByClient(long clientId) {
         // Asumiendo que projectRepository.findByClientId ahora busca por el ID del
-        // usuario en la columna client_user_id
+        // usuario en la columna client_id
         // Si el repositorio usa JPA method names, necesitará ser actualizado a
         // findByClient_Id o similar.
         // Asumiremos que el repositorio será actualizado.
