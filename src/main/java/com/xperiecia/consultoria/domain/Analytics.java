@@ -21,7 +21,7 @@ public class Analytics {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_user_id", nullable = false)
+    @JoinColumn(name = "client_id", nullable = false)
     @JsonIgnore
     private User client;
 
