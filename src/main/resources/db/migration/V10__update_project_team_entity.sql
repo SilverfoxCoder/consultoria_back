@@ -24,13 +24,13 @@ BEGIN
         ALTER TABLE project_team DROP COLUMN user_id;
     END IF;
 
-    -- Add column explicitly as UNSIGNED to match users.id if it's auto_increment unsigned
-    ALTER TABLE project_team ADD COLUMN user_id BIGINT UNSIGNED;
+    -- Add column explicitly as BIGINT to match users.id (Signed)
+    ALTER TABLE project_team ADD COLUMN user_id BIGINT;
 
-    -- Add Foreign Key constraint - DISABLED TEMPORARILY due to incompatibility
-    -- ALTER TABLE project_team 
-    -- ADD CONSTRAINT fk_project_team_user 
-    -- FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+    -- Add Foreign Key constraint
+    ALTER TABLE project_team 
+    ADD CONSTRAINT fk_project_team_user 
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
 
     -- Add index
     CREATE INDEX idx_project_team_user ON project_team(user_id);
