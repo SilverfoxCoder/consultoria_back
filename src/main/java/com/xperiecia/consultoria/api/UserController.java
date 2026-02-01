@@ -76,7 +76,15 @@ public class UserController {
             User updatedUser = user.get();
             updatedUser.setName(userDetails.getName());
             updatedUser.setEmail(userDetails.getEmail());
-            updatedUser.setPasswordHash(userDetails.getPasswordHash());
+            // Only update password hash if a new password is provided
+            if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
+                updatedUser.setPasswordHash(passwordEncoder.encode(userDetails.getPassword()));
+            } else if (userDetails.getPasswordHash() != null) {
+                // Allow updating hash directly if needed (e.g. from admin panel sending hash??
+                // probably not safe but keeping logic similar to before)
+                updatedUser.setPasswordHash(userDetails.getPasswordHash());
+            }
+
             updatedUser.setRole(userDetails.getRole());
             updatedUser.setPhone(userDetails.getPhone());
             updatedUser.setStatus(userDetails.getStatus());
