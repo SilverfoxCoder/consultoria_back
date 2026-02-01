@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -52,6 +53,9 @@ public class AuthController {
     @Autowired
     private com.xperiecia.consultoria.application.AdminNotificationService adminNotificationService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     /**
      * Autenticar usuario con email y contraseña
      * 
@@ -73,9 +77,10 @@ public class AuthController {
                 boolean passwordValid = false;
 
                 // Para desarrollo, aceptar contraseñas simples
+                // Para desarrollo, aceptar contraseñas simples o verificar hash
                 if (loginRequest.getPassword().equals("password") ||
                         loginRequest.getPassword().equals("admin123") ||
-                        user.getPasswordHash().equals(loginRequest.getPassword())) {
+                        passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
                     passwordValid = true;
                 }
 
@@ -654,4 +659,3 @@ public class AuthController {
         }
     }
 }
-
