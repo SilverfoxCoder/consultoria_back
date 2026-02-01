@@ -3,8 +3,8 @@ package com.xperiecia.consultoria.api;
 import com.xperiecia.consultoria.application.NotificationService;
 import com.xperiecia.consultoria.domain.Budget;
 import com.xperiecia.consultoria.domain.BudgetRepository;
-import com.xperiecia.consultoria.domain.Client;
-import com.xperiecia.consultoria.domain.ClientRepository;
+import com.xperiecia.consultoria.domain.User;
+import com.xperiecia.consultoria.domain.UserRepository;
 import com.xperiecia.consultoria.dto.BudgetRequest;
 import com.xperiecia.consultoria.dto.BudgetResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
+// import java.math.BigDecimal; // Removed unused import
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +40,7 @@ public class BudgetController {
     private BudgetRepository budgetRepository;
 
     @Autowired
-    private ClientRepository clientRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private NotificationService notificationService;
@@ -142,16 +142,16 @@ public class BudgetController {
             System.out.println("AdditionalInfo: " + request.getAdditionalInfo());
             System.out.println("ClientId: " + request.getClientId());
 
-            // Validar que el cliente existe
-            System.out.println("Buscando cliente con ID: " + request.getClientId());
-            Optional<Client> clientOptional = clientRepository.findById(request.getClientId());
-            if (clientOptional.isEmpty()) {
-                System.out.println("ERROR: Cliente no encontrado con ID: " + request.getClientId());
+            // Validar que el cliente (ahora Usuario) existe
+            System.out.println("Buscando usuario con ID: " + request.getClientId());
+            Optional<User> userOptional = userRepository.findById(request.getClientId().longValue());
+            if (userOptional.isEmpty()) {
+                System.out.println("ERROR: Usuario no encontrado con ID: " + request.getClientId());
                 return ResponseEntity.badRequest().build();
             }
 
-            Client client = clientOptional.get();
-            System.out.println("Cliente encontrado: " + client.getName());
+            User client = userOptional.get();
+            System.out.println("Cliente (Usuario) encontrado: " + client.getName());
 
             // Crear el presupuesto
             Budget budget = new Budget();
@@ -204,14 +204,14 @@ public class BudgetController {
     /**
      * Crear un presupuesto para un cliente específico
      * 
-     * @param clientId ID del cliente
+     * @param clientId ID del cliente (Usuario)
      * @param request  Datos del presupuesto
      * @return Presupuesto creado
      */
     @PostMapping("/client/{clientId}")
     @Operation(summary = "Crear presupuesto para un cliente específico")
     public ResponseEntity<BudgetResponse> createBudgetForClient(
-            @PathVariable Long clientId,
+            @PathVariable long clientId,
             @RequestBody BudgetRequest request) {
 
         try {
@@ -237,16 +237,16 @@ public class BudgetController {
                 return ResponseEntity.badRequest().build();
             }
 
-            // Validar que el cliente existe
-            System.out.println("Buscando cliente con ID: " + clientId);
-            Optional<Client> clientOptional = clientRepository.findById(clientId);
-            if (clientOptional.isEmpty()) {
-                System.err.println("❌ ERROR: Cliente no encontrado con ID: " + clientId);
+            // Validar que el cliente (Usuario) existe
+            System.out.println("Buscando usuario con ID: " + clientId);
+            Optional<User> userOptional = userRepository.findById(clientId);
+            if (userOptional.isEmpty()) {
+                System.err.println("❌ ERROR: Usuario no encontrado con ID: " + clientId);
                 return ResponseEntity.notFound().build();
             }
 
-            Client client = clientOptional.get();
-            System.out.println("✅ Cliente encontrado: " + client.getName());
+            User client = userOptional.get();
+            System.out.println("✅ Cliente (Usuario) encontrado: " + client.getName());
 
             // Crear el presupuesto
             Budget budget = new Budget();
@@ -327,9 +327,11 @@ public class BudgetController {
      */
     @GetMapping("/client/{clientId}")
     @Operation(summary = "Obtener presupuestos de un cliente")
-    public ResponseEntity<List<BudgetResponse>> getBudgetsByClient(@PathVariable Long clientId) {
+    public ResponseEntity<List<BudgetResponse>> getBudgetsByClient(@PathVariable long clientId) {
         try {
-            List<Budget> budgets = budgetRepository.findByClientIdOrderByCreatedAtDesc(clientId);
+            // Usamos findByClient_Id o findByClient_IdOrderByCreatedAtDesc según el
+            // repositorio actualizado
+            List<Budget> budgets = budgetRepository.findByClient_IdOrderByCreatedAtDesc(clientId);
             List<BudgetResponse> responses = budgets.stream()
                     .map(this::convertToResponse)
                     .collect(Collectors.toList());
@@ -349,7 +351,7 @@ public class BudgetController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "Obtener un presupuesto por ID")
-    public ResponseEntity<BudgetResponse> getBudgetById(@PathVariable Long id) {
+    public ResponseEntity<BudgetResponse> getBudgetById(@PathVariable long id) {
         try {
             Optional<Budget> budgetOptional = budgetRepository.findById(id);
             if (budgetOptional.isPresent()) {
@@ -399,7 +401,7 @@ public class BudgetController {
     @PutMapping("/{id}/status")
     @Operation(summary = "Actualizar estado de un presupuesto")
     public ResponseEntity<BudgetResponse> updateBudgetStatus(
-            @PathVariable Long id,
+            @PathVariable long id,
             @RequestBody Map<String, Object> statusRequest) {
 
         try {
@@ -556,7 +558,7 @@ public class BudgetController {
      */
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar un presupuesto")
-    public ResponseEntity<Map<String, Object>> deleteBudget(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> deleteBudget(@PathVariable long id) {
         try {
             Optional<Budget> budgetOptional = budgetRepository.findById(id);
             if (budgetOptional.isPresent()) {
@@ -710,9 +712,9 @@ public class BudgetController {
 
                 System.out.println("Converted Client ID: " + clientId);
 
-                Optional<Client> clientOptional = clientRepository.findById(clientId);
-                if (clientOptional.isPresent()) {
-                    System.out.println("Client found: " + clientOptional.get().getName());
+                Optional<User> userOptional = userRepository.findById(clientId);
+                if (userOptional.isPresent()) {
+                    System.out.println("Client found: " + userOptional.get().getName());
                 } else {
                     System.out.println("Client NOT found with ID: " + clientId);
                 }
@@ -741,7 +743,13 @@ public class BudgetController {
     @Operation(summary = "Listar clientes disponibles")
     public ResponseEntity<List<Map<String, Object>>> getAvailableClients() {
         try {
-            List<Client> clients = clientRepository.findAll();
+            // Ahora buscamos usuarios con rol (approx)
+            // Para simplificar, buscamos todos los usuarios y filtramos.
+            // Idealmente userRepository.findByRole("client")
+            List<User> clients = userRepository.findAll().stream()
+                    .filter(u -> "client".equalsIgnoreCase(u.getRole()) || "cliente".equalsIgnoreCase(u.getRole()))
+                    .collect(Collectors.toList());
+
             List<Map<String, Object>> clientList = clients.stream()
                     .map(client -> {
                         Map<String, Object> clientMap = new HashMap<>();
@@ -801,8 +809,11 @@ public class BudgetController {
         response.setBudget(budget.getBudget());
         response.setTimeline(budget.getTimeline());
         response.setAdditionalInfo(budget.getAdditionalInfo());
-        response.setClientId(budget.getClient().getId());
-        response.setClientName(budget.getClient().getName());
+        // Ajustamos validación de nulo para client
+        if (budget.getClient() != null) {
+            response.setClientId(budget.getClient().getId());
+            response.setClientName(budget.getClient().getName());
+        }
         response.setStatus(budget.getStatus().name());
         response.setStatusDisplay(budget.getStatus().getDisplayName());
         response.setCreatedAt(budget.getCreatedAt());

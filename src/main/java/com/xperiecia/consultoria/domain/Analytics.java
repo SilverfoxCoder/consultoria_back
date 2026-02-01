@@ -21,9 +21,9 @@ public class Analytics {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false)
+    @JoinColumn(name = "client_user_id", nullable = false)
     @JsonIgnore
-    private Client client;
+    private User client;
 
     @Column(name = "month_period", nullable = false)
     private String monthPeriod; // formato 'YYYY-MM'

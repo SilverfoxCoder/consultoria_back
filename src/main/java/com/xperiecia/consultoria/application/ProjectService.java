@@ -2,8 +2,8 @@ package com.xperiecia.consultoria.application;
 
 import com.xperiecia.consultoria.domain.Project;
 import com.xperiecia.consultoria.domain.ProjectRepository;
-import com.xperiecia.consultoria.domain.Client;
-import com.xperiecia.consultoria.domain.ClientRepository;
+import com.xperiecia.consultoria.domain.User;
+import com.xperiecia.consultoria.domain.UserRepository;
 import com.xperiecia.consultoria.dto.ProjectDTO;
 import com.xperiecia.consultoria.dto.CreateProjectRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import com.xperiecia.consultoria.domain.ProjectTeamRepository;
 import com.xperiecia.consultoria.domain.TaskRepository;
 import com.xperiecia.consultoria.domain.TimeEntryRepository;
-import com.xperiecia.consultoria.domain.User;
 import com.xperiecia.consultoria.domain.ProjectTeam;
 
 @Service
@@ -29,7 +28,7 @@ public class ProjectService {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private ClientRepository clientRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private ProjectTeamRepository projectTeamRepository;
@@ -43,9 +42,6 @@ public class ProjectService {
     @Autowired
     private com.xperiecia.consultoria.domain.ProjectCommentRepository projectCommentRepository;
 
-    @Autowired
-    private com.xperiecia.consultoria.domain.UserRepository userRepository;
-
     // Obtener todos los proyectos
     public List<ProjectDTO> getAllProjects() {
         return projectRepository.findAll()
@@ -55,7 +51,7 @@ public class ProjectService {
     }
 
     // Obtener proyecto por ID
-    public ProjectDTO getProjectById(Long id) {
+    public ProjectDTO getProjectById(long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID: " + id));
         return ProjectDTO.fromEntity(project);
@@ -66,9 +62,10 @@ public class ProjectService {
         // Validaciones
         validateProjectRequest(request);
 
-        // Verificar que el cliente existe
-        Client client = clientRepository.findById(request.getClientId())
-                .orElseThrow(() -> new RuntimeException("Cliente no encontrado con ID: " + request.getClientId()));
+        // Verificar que el cliente existe (ahora User)
+        User client = userRepository.findById(request.getClientId())
+                .orElseThrow(
+                        () -> new RuntimeException("Cliente (Usuario) no encontrado con ID: " + request.getClientId()));
 
         Project project = new Project();
         project.setName(request.getName());
@@ -86,8 +83,6 @@ public class ProjectService {
         project.setJiraProjectKey(request.getJiraProjectKey());
         project.setJiraBoardId(request.getJiraBoardId());
 
-        project.setJiraBoardId(request.getJiraBoardId());
-
         Project savedProject = projectRepository.save(project);
 
         // Asignar miembros del equipo si se proporcionan IDs
@@ -101,21 +96,10 @@ public class ProjectService {
                     teamMember.setProject(savedProject);
                     teamMember.setName(user.getName()); // Usamos el nombre del usuario
                     teamMember.setRole("Consultor"); // Rol por defecto
-                    // No tenemos un campo 'userId' o relación directa 'User' en ProjectTeam según
-                    // la entidad vista,
-                    // pero ProjectTeam tiene 'name' y 'role'.
-                    // REVISIÓN: La entidad ProjectTeam mostrada anteriormente tenía:
-                    // private Project project;
-                    // private String name;
-                    // private String role;
-                    // NO tiene relación directa con User. Esto es una limitación del diseño actual.
-                    // Sin embargo, para cumplir el requerimiento, guardaremos el nombre del
-                    // usuario.
 
                     projectTeamRepository.save(teamMember);
                 } catch (Exception e) {
                     System.err.println("Error asignando usuario " + userId + " al proyecto: " + e.getMessage());
-                    // Continuamos con los siguientes
                 }
             }
         }
@@ -124,15 +108,16 @@ public class ProjectService {
     }
 
     // Actualizar proyecto
-    public ProjectDTO updateProject(Long id, CreateProjectRequest request) {
+    public ProjectDTO updateProject(long id, CreateProjectRequest request) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID: " + id));
 
         validateProjectRequest(request);
 
         // Verificar que el cliente existe
-        Client client = clientRepository.findById(request.getClientId())
-                .orElseThrow(() -> new RuntimeException("Cliente no encontrado con ID: " + request.getClientId()));
+        User client = userRepository.findById(request.getClientId())
+                .orElseThrow(
+                        () -> new RuntimeException("Cliente (Usuario) no encontrado con ID: " + request.getClientId()));
 
         project.setName(request.getName());
         project.setClient(client);
@@ -151,16 +136,11 @@ public class ProjectService {
 
         Project updatedProject = projectRepository.save(project);
 
-        // Actualizar miembros del equipo si se proporcionan IDs
-        // Nota: Esto reemplazará los miembros existentes si se envía la lista.
-        // Si la lista es null, NO se tocan los miembros existentes.
-        // Si la lista está vacía, se eliminan todos (opcional, aquí asumiremos que []
-        // limpia el equipo).
+        if (project.getClient() != null && project.getClient().getId() != null) {
+            userRepository.findById(project.getClient().getId().longValue()).ifPresent(project::setClient);
+        }
         if (request.getTeamMemberIds() != null) {
-            // Eliminar miembros actuales
             projectTeamRepository.deleteByProjectId(id);
-
-            // Agregar nuevos
             for (Long userId : request.getTeamMemberIds()) {
                 try {
                     User user = userRepository.findById(userId)
@@ -182,37 +162,32 @@ public class ProjectService {
     }
 
     // Eliminar proyecto
-    public void deleteProject(Long id) {
-        Project project = projectRepository.findById(id)
+    public void deleteProject(long id) {
+        projectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID: " + id));
 
-        // Eliminar dependencias automáticamente
         try {
-            // Eliminar miembros del equipo del proyecto
             projectTeamRepository.deleteByProjectId(id);
-
-            // Eliminar tareas del proyecto
             taskRepository.deleteByProjectId(id);
-
-            // Eliminar entradas de tiempo del proyecto
             timeEntryRepository.deleteByProjectId(id);
-
-            // Finalmente eliminar el proyecto
             projectRepository.deleteById(id);
         } catch (Exception e) {
-            // Si hay un error de restricción de clave foránea, proporcionar información más
-            // específica
             if (e.getMessage().contains("foreign key constraint")) {
                 throw new RuntimeException(
-                        "No se puede eliminar el proyecto porque tiene dependencias (tareas, entradas de tiempo, etc.). Elimine primero las dependencias.");
+                        "No se puede eliminar el proyecto porque tiene dependencias. Elimine primero las dependencias.");
             }
             throw new RuntimeException("Error al eliminar el proyecto: " + e.getMessage());
         }
     }
 
-    // Obtener proyectos por cliente
-    public List<ProjectDTO> getProjectsByClient(Long clientId) {
-        return projectRepository.findByClientId(clientId)
+    // Obtener proyectos por cliente (ahora es User)
+    public List<ProjectDTO> getProjectsByClient(long clientId) {
+        // Asumiendo que projectRepository.findByClientId ahora busca por el ID del
+        // usuario en la columna client_user_id
+        // Si el repositorio usa JPA method names, necesitará ser actualizado a
+        // findByClient_Id o similar.
+        // Asumiremos que el repositorio será actualizado.
+        return projectRepository.findByClient_Id(clientId)
                 .stream()
                 .map(ProjectDTO::fromEntity)
                 .collect(Collectors.toList());

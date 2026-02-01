@@ -2,7 +2,7 @@ package com.xperiecia.consultoria.api;
 
 import com.xperiecia.consultoria.domain.Analytics;
 import com.xperiecia.consultoria.domain.AnalyticsRepository;
-import com.xperiecia.consultoria.domain.ClientRepository;
+import com.xperiecia.consultoria.domain.UserRepository;
 import com.xperiecia.consultoria.dto.AnalyticsDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +23,7 @@ public class AnalyticsController {
     private AnalyticsRepository analyticsRepository;
 
     @Autowired
-    private ClientRepository clientRepository;
+    private UserRepository userRepository;
 
     private AnalyticsDTO convertToDTO(Analytics analytics) {
         return new AnalyticsDTO(
@@ -46,7 +46,7 @@ public class AnalyticsController {
         analytics.setAvgResponseTime(dto.getAvgResponseTime());
 
         if (dto.getClientId() != null) {
-            clientRepository.findById(dto.getClientId()).ifPresent(analytics::setClient);
+            userRepository.findById(dto.getClientId().longValue()).ifPresent(analytics::setClient);
         }
 
         return analytics;
@@ -62,7 +62,7 @@ public class AnalyticsController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener analítica por ID")
-    public ResponseEntity<AnalyticsDTO> getAnalyticsById(@PathVariable Long id) {
+    public ResponseEntity<AnalyticsDTO> getAnalyticsById(@PathVariable long id) {
         Optional<Analytics> analytics = analyticsRepository.findById(id);
         return analytics.map(this::convertToDTO)
                 .map(ResponseEntity::ok)
@@ -71,8 +71,9 @@ public class AnalyticsController {
 
     @GetMapping("/client/{clientId}")
     @Operation(summary = "Obtener analíticas por cliente")
-    public List<AnalyticsDTO> getAnalyticsByClient(@PathVariable Long clientId) {
-        return analyticsRepository.findByClientId(clientId).stream()
+    public List<AnalyticsDTO> getAnalyticsByClient(@PathVariable long clientId) {
+        // Updated to use findByClient_Id
+        return analyticsRepository.findByClient_Id(clientId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -87,9 +88,10 @@ public class AnalyticsController {
 
     @GetMapping("/client/{clientId}/month/{monthPeriod}")
     @Operation(summary = "Obtener analítica específica por cliente y mes")
-    public ResponseEntity<AnalyticsDTO> getAnalyticsByClientAndMonth(@PathVariable Long clientId,
+    public ResponseEntity<AnalyticsDTO> getAnalyticsByClientAndMonth(@PathVariable long clientId,
             @PathVariable String monthPeriod) {
-        Optional<Analytics> analytics = analyticsRepository.findByClientIdAndMonthPeriod(clientId, monthPeriod);
+        // Updated to use findByClient_IdAndMonthPeriod
+        Optional<Analytics> analytics = analyticsRepository.findByClient_IdAndMonthPeriod(clientId, monthPeriod);
         return analytics.map(this::convertToDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -105,7 +107,7 @@ public class AnalyticsController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar analítica")
-    public ResponseEntity<AnalyticsDTO> updateAnalytics(@PathVariable Long id, @RequestBody AnalyticsDTO analyticsDTO) {
+    public ResponseEntity<AnalyticsDTO> updateAnalytics(@PathVariable long id, @RequestBody AnalyticsDTO analyticsDTO) {
         Optional<Analytics> analytics = analyticsRepository.findById(id);
         if (analytics.isPresent()) {
             Analytics updatedAnalytics = analytics.get();
@@ -114,9 +116,9 @@ public class AnalyticsController {
             updatedAnalytics.setActiveProjects(analyticsDTO.getActiveProjects());
             updatedAnalytics.setOpenTickets(analyticsDTO.getOpenTickets());
             updatedAnalytics.setAvgResponseTime(analyticsDTO.getAvgResponseTime());
-            
+
             if (analyticsDTO.getClientId() != null) {
-                clientRepository.findById(analyticsDTO.getClientId()).ifPresent(updatedAnalytics::setClient);
+                userRepository.findById(analyticsDTO.getClientId().longValue()).ifPresent(updatedAnalytics::setClient);
             }
 
             Analytics savedAnalytics = analyticsRepository.save(updatedAnalytics);
@@ -127,7 +129,7 @@ public class AnalyticsController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar analítica")
-    public ResponseEntity<Void> deleteAnalytics(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteAnalytics(@PathVariable long id) {
         Optional<Analytics> analytics = analyticsRepository.findById(id);
         if (analytics.isPresent()) {
             analyticsRepository.deleteById(id);

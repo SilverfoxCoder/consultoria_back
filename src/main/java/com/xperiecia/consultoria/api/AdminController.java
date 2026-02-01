@@ -108,7 +108,7 @@ public class AdminController {
      */
     @DeleteMapping("/notifications/{id}")
     @Operation(summary = "Eliminar notificación específica")
-    public ResponseEntity<Map<String, Object>> deleteNotification(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> deleteNotification(@PathVariable long id) {
         try {
             Optional<Notification> notificationOpt = notificationRepository.findById(id);
             if (notificationOpt.isEmpty()) {
@@ -152,7 +152,7 @@ public class AdminController {
      */
     @PutMapping("/notifications/{id}/read")
     @Operation(summary = "Marcar notificación como leída")
-    public ResponseEntity<Map<String, Object>> markNotificationAsRead(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> markNotificationAsRead(@PathVariable long id) {
         try {
             Optional<Notification> notificationOpt = notificationRepository.findById(id);
             if (notificationOpt.isEmpty()) {
@@ -272,7 +272,7 @@ public class AdminController {
      */
     @PostMapping("/notifications/test/user-registration/{userId}")
     @Operation(summary = "Simular notificación de nuevo registro")
-    public ResponseEntity<Map<String, Object>> testUserRegistrationNotification(@PathVariable Long userId) {
+    public ResponseEntity<Map<String, Object>> testUserRegistrationNotification(@PathVariable long userId) {
         try {
             Optional<User> userOpt = userRepository.findById(userId);
             if (!userOpt.isPresent()) {
@@ -306,7 +306,7 @@ public class AdminController {
      */
     @PostMapping("/notifications/test/first-login/{userId}")
     @Operation(summary = "Simular notificación de primer login")
-    public ResponseEntity<Map<String, Object>> testFirstLoginNotification(@PathVariable Long userId) {
+    public ResponseEntity<Map<String, Object>> testFirstLoginNotification(@PathVariable long userId) {
         try {
             Optional<User> userOpt = userRepository.findById(userId);
             if (!userOpt.isPresent()) {

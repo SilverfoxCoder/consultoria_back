@@ -43,7 +43,7 @@ public class HealthController {
 
         try {
             // Verificar conectividad a la base de datos
-            long userCount = userRepository.count();
+            userRepository.count();
 
             health.put("status", "healthy");
             health.put("database", "connected");
@@ -63,4 +63,4 @@ public class HealthController {
             return ResponseEntity.status(503).body(errorHealth);
         }
     }
-} 
+}

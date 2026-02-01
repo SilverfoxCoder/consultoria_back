@@ -42,7 +42,7 @@ public class InvoiceController {
     @GetMapping("/client/{clientId}")
     @Operation(summary = "Obtener facturas por cliente")
     public List<InvoiceDTO> getInvoicesByClient(@PathVariable Long clientId) {
-        return invoiceRepository.findByClientId(clientId).stream()
+        return invoiceRepository.findByClient_Id(clientId).stream()
                 .map(InvoiceDTO::fromEntity)
                 .collect(Collectors.toList());
     }

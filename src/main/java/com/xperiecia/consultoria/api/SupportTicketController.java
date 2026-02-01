@@ -36,7 +36,7 @@ public class SupportTicketController {
     @GetMapping("/client/{clientId}")
     @Operation(summary = "Obtener tickets por cliente")
     public List<SupportTicket> getSupportTicketsByClient(@PathVariable Long clientId) {
-        return supportTicketRepository.findByClientId(clientId);
+        return supportTicketRepository.findByClient_Id(clientId);
     }
 
     @GetMapping("/status/{status}")

@@ -9,9 +9,9 @@ import java.util.Optional;
 @Repository
 public interface AnalyticsRepository extends JpaRepository<Analytics, Long> {
 
-    List<Analytics> findByClientId(Long clientId);
+    List<Analytics> findByClient_Id(Long clientId);
 
-    Optional<Analytics> findByClientIdAndMonthPeriod(Long clientId, String monthPeriod);
+    Optional<Analytics> findByClient_IdAndMonthPeriod(Long clientId, String monthPeriod);
 
     List<Analytics> findByMonthPeriod(String monthPeriod);
 }

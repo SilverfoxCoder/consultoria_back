@@ -17,13 +17,13 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     Invoice findByNumber(String number);
 
     // Buscar por cliente
-    List<Invoice> findByClientId(Long clientId);
+    List<Invoice> findByClient_Id(Long clientId);
 
     // Buscar por estado
     List<Invoice> findByStatus(Invoice.InvoiceStatus status);
 
     // Buscar por cliente y estado
-    List<Invoice> findByClientIdAndStatus(Long clientId, Invoice.InvoiceStatus status);
+    List<Invoice> findByClient_IdAndStatus(Long clientId, Invoice.InvoiceStatus status);
 
     // Buscar facturas vencidas
     @Query("SELECT i FROM Invoice i WHERE i.issuedAt < :today AND i.status NOT IN ('PAGADA', 'CANCELADA')")

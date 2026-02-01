@@ -10,7 +10,8 @@ import java.util.List;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
-    List<Project> findByClientId(Long clientId);
+    // Buscar por ID de usuario (que ahora actúa como cliente)
+    List<Project> findByClient_Id(Long clientId);
 
     List<Project> findByStatus(Project.ProjectStatus status);
 

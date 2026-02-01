@@ -36,7 +36,7 @@ public class ServiceController {
     @GetMapping("/client/{clientId}")
     @Operation(summary = "Obtener servicios por cliente")
     public List<Service> getServicesByClient(@PathVariable Long clientId) {
-        return serviceRepository.findByClientId(clientId);
+        return serviceRepository.findByClient_Id(clientId);
     }
 
     @GetMapping("/status/{status}")

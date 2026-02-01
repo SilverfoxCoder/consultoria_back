@@ -3,7 +3,7 @@ package com.xperiecia.consultoria.api;
 import com.xperiecia.consultoria.domain.User;
 import com.xperiecia.consultoria.domain.UserRepository;
 import com.xperiecia.consultoria.dto.RegisterUserRequest;
-import com.xperiecia.consultoria.dto.UserDTO;
+// import com.xperiecia.consultoria.dto.UserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,13 +95,15 @@ public class RegisterController {
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Usuario registrado exitosamente");
-            response.put("user", new HashMap<String, Object>() {{
-                put("id", savedUser.getId());
-                put("name", savedUser.getName());
-                put("email", savedUser.getEmail());
-                put("role", savedUser.getRole());
-                put("phone", savedUser.getPhone());
-            }});
+            response.put("user", new HashMap<String, Object>() {
+                {
+                    put("id", savedUser.getId());
+                    put("name", savedUser.getName());
+                    put("email", savedUser.getEmail());
+                    put("role", savedUser.getRole());
+                    put("phone", savedUser.getPhone());
+                }
+            });
 
             return ResponseEntity.ok(response);
 
@@ -124,12 +126,12 @@ public class RegisterController {
     public ResponseEntity<Map<String, Object>> checkEmailAvailability(@PathVariable String email) {
         try {
             boolean isAvailable = !userRepository.findByEmail(email).isPresent();
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("email", email);
             response.put("available", isAvailable);
             response.put("message", isAvailable ? "Email disponible" : "Email ya registrado");
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
@@ -137,4 +139,4 @@ public class RegisterController {
             return ResponseEntity.internalServerError().body(response);
         }
     }
-} 
+}

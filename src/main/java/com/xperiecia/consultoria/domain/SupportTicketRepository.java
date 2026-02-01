@@ -8,11 +8,11 @@ import java.util.List;
 @Repository
 public interface SupportTicketRepository extends JpaRepository<SupportTicket, Long> {
 
-    List<SupportTicket> findByClientId(Long clientId);
+    List<SupportTicket> findByClient_Id(Long clientId);
 
     List<SupportTicket> findByStatus(String status);
 
     List<SupportTicket> findByPriority(String priority);
 
-    List<SupportTicket> findByClientIdAndStatus(Long clientId, String status);
+    List<SupportTicket> findByClient_IdAndStatus(Long clientId, String status);
 }

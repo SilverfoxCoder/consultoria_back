@@ -284,7 +284,8 @@ public class NotificationController {
             String priority = extractString(data, "priority", "high");
             String targetRole = extractString(data, "targetRole", "admin");
             Long budgetId = extractLong(data, "budgetId");
-            String budgetTitle = extractString(data, "budgetTitle", "Presupuesto");
+            // String budgetTitle = extractString(data, "budgetTitle", "Presupuesto"); //
+            // Unused
 
             // Crear notificación
             Notification notification = new Notification("BUDGET_PENDING", title, message, priority);

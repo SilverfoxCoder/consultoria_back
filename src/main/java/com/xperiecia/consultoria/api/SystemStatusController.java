@@ -28,8 +28,8 @@ public class SystemStatusController {
     @Autowired
     private ProjectRepository projectRepository;
 
-    @Autowired
-    private ClientRepository clientRepository;
+    // @Autowired
+    // private ClientRepository clientRepository; // Removed
 
     @Autowired
     private UserRepository userRepository;
@@ -62,7 +62,7 @@ public class SystemStatusController {
 
             // Conteos básicos
             status.put("totalProjects", projectRepository.count());
-            status.put("totalClients", clientRepository.count());
+            status.put("totalClients", userRepository.countByRole("CLIENT"));
             status.put("totalUsers", userRepository.count());
             status.put("totalInvoices", invoiceRepository.count());
             status.put("totalTasks", taskRepository.count());
@@ -103,13 +103,12 @@ public class SystemStatusController {
             projectMetrics.put("paused", projectRepository.countByStatus(Project.ProjectStatus.PAUSADO));
             metrics.put("projects", projectMetrics);
 
-            // Métricas de clientes (usando métodos existentes)
+            // Métricas de clientes (migrado a UserRepository)
             Map<String, Object> clientMetrics = new HashMap<>();
-            clientMetrics.put("total", clientRepository.count());
-            // Usar métodos que existen en ClientRepository
-            clientMetrics.put("active", clientRepository.findByStatus("Activo").size());
-            clientMetrics.put("prospect", clientRepository.findByStatus("Prospecto").size());
-            clientMetrics.put("inactive", clientRepository.findByStatus("Inactivo").size());
+            clientMetrics.put("total", userRepository.countByRole("CLIENT")); // Total clientes
+            clientMetrics.put("active", userRepository.countByRoleAndStatus("CLIENT", "Activo"));
+            clientMetrics.put("prospect", userRepository.countByRoleAndStatus("CLIENT", "Prospecto"));
+            clientMetrics.put("inactive", userRepository.countByRoleAndStatus("CLIENT", "Inactivo"));
             metrics.put("clients", clientMetrics);
 
             // Métricas de usuarios (simplificado)
@@ -177,7 +176,7 @@ public class SystemStatusController {
 
         try {
             // Verificar conectividad a la base de datos
-            long userCount = userRepository.count();
+            userRepository.count();
 
             health.put("status", "healthy");
             health.put("database", "connected");

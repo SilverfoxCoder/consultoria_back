@@ -7,7 +7,7 @@ import com.xperiecia.consultoria.domain.InvoiceRepository;
 import com.xperiecia.consultoria.dto.InvoiceItemDTO;
 import com.xperiecia.consultoria.dto.CreateInvoiceItemRequest;
 import com.xperiecia.consultoria.exception.ResourceNotFoundException;
-import com.xperiecia.consultoria.exception.ValidationException;
+// import com.xperiecia.consultoria.exception.ValidationException; // Removed unused import
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +34,7 @@ public class InvoiceItemService {
                 .collect(Collectors.toList());
     }
 
-    public InvoiceItemDTO getInvoiceItemById(Long id) {
+    public InvoiceItemDTO getInvoiceItemById(long id) {
         InvoiceItem invoiceItem = invoiceItemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ítem de factura no encontrado con ID: " + id));
         return InvoiceItemDTO.fromEntity(invoiceItem);
@@ -42,8 +42,9 @@ public class InvoiceItemService {
 
     public InvoiceItemDTO createInvoiceItem(CreateInvoiceItemRequest request) {
         // Validar que la factura existe
-        Invoice invoice = invoiceRepository.findById(request.getInvoiceId())
-                .orElseThrow(() -> new ResourceNotFoundException("Factura no encontrada con ID: " + request.getInvoiceId()));
+        Invoice invoice = invoiceRepository.findById(request.getInvoiceId().longValue())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Factura no encontrada con ID: " + request.getInvoiceId()));
 
         // Crear el ítem
         InvoiceItem invoiceItem = new InvoiceItem();
@@ -64,14 +65,15 @@ public class InvoiceItemService {
         return InvoiceItemDTO.fromEntity(savedItem);
     }
 
-    public InvoiceItemDTO updateInvoiceItem(Long id, CreateInvoiceItemRequest request) {
+    public InvoiceItemDTO updateInvoiceItem(long id, CreateInvoiceItemRequest request) {
         InvoiceItem existingItem = invoiceItemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ítem de factura no encontrado con ID: " + id));
 
         // Validar que la factura existe si se está cambiando
         if (!existingItem.getInvoice().getId().equals(request.getInvoiceId())) {
-            Invoice invoice = invoiceRepository.findById(request.getInvoiceId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Factura no encontrada con ID: " + request.getInvoiceId()));
+            Invoice invoice = invoiceRepository.findById(request.getInvoiceId().longValue())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Factura no encontrada con ID: " + request.getInvoiceId()));
             existingItem.setInvoice(invoice);
         }
 
@@ -91,7 +93,7 @@ public class InvoiceItemService {
         return InvoiceItemDTO.fromEntity(updatedItem);
     }
 
-    public void deleteInvoiceItem(Long id) {
+    public void deleteInvoiceItem(long id) {
         if (!invoiceItemRepository.existsById(id)) {
             throw new ResourceNotFoundException("Ítem de factura no encontrado con ID: " + id);
         }
@@ -99,13 +101,13 @@ public class InvoiceItemService {
     }
 
     // Specialized Queries
-    public List<InvoiceItemDTO> getInvoiceItemsByInvoice(Long invoiceId) {
+    public List<InvoiceItemDTO> getInvoiceItemsByInvoice(long invoiceId) {
         return invoiceItemRepository.findByInvoiceId(invoiceId).stream()
                 .map(InvoiceItemDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    public List<InvoiceItemDTO> getActiveInvoiceItemsByInvoice(Long invoiceId) {
+    public List<InvoiceItemDTO> getActiveInvoiceItemsByInvoice(long invoiceId) {
         return invoiceItemRepository.findActiveItemsByInvoice(invoiceId).stream()
                 .map(InvoiceItemDTO::fromEntity)
                 .collect(Collectors.toList());
@@ -143,8 +145,8 @@ public class InvoiceItemService {
                 .collect(Collectors.toList());
     }
 
-    public List<InvoiceItemDTO> getInvoiceItemsByClient(Long clientId) {
-        return invoiceItemRepository.findByClientId(clientId).stream()
+    public List<InvoiceItemDTO> getInvoiceItemsByClient(long clientId) {
+        return invoiceItemRepository.findByClient_Id(clientId).stream()
                 .map(InvoiceItemDTO::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -174,31 +176,31 @@ public class InvoiceItemService {
     }
 
     // Statistics and Calculations
-    public BigDecimal calculateTotalByInvoice(Long invoiceId) {
+    public BigDecimal calculateTotalByInvoice(long invoiceId) {
         BigDecimal total = invoiceItemRepository.calculateTotalByInvoice(invoiceId);
         return total != null ? total : BigDecimal.ZERO;
     }
 
-    public BigDecimal calculateTotalTaxByInvoice(Long invoiceId) {
+    public BigDecimal calculateTotalTaxByInvoice(long invoiceId) {
         BigDecimal totalTax = invoiceItemRepository.calculateTotalTaxByInvoice(invoiceId);
         return totalTax != null ? totalTax : BigDecimal.ZERO;
     }
 
-    public BigDecimal calculateTotalDiscountByInvoice(Long invoiceId) {
+    public BigDecimal calculateTotalDiscountByInvoice(long invoiceId) {
         BigDecimal totalDiscount = invoiceItemRepository.calculateTotalDiscountByInvoice(invoiceId);
         return totalDiscount != null ? totalDiscount : BigDecimal.ZERO;
     }
 
-    public BigDecimal calculateTotalByClient(Long clientId) {
+    public BigDecimal calculateTotalByClient(long clientId) {
         BigDecimal total = invoiceItemRepository.calculateTotalByClient(clientId);
         return total != null ? total : BigDecimal.ZERO;
     }
 
-    public Long countInvoiceItemsByInvoice(Long invoiceId) {
+    public Long countInvoiceItemsByInvoice(long invoiceId) {
         return invoiceItemRepository.countByInvoice(invoiceId);
     }
 
-    public Long countActiveInvoiceItemsByInvoice(Long invoiceId) {
+    public Long countActiveInvoiceItemsByInvoice(long invoiceId) {
         return invoiceItemRepository.countActiveByInvoice(invoiceId);
     }
 
@@ -209,4 +211,4 @@ public class InvoiceItemService {
     public List<Object[]> getStatisticsByStatus() {
         return invoiceItemRepository.getStatisticsByStatus();
     }
-} 
+}

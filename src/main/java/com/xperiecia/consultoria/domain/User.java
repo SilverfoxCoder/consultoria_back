@@ -23,6 +23,31 @@ public class User {
     private String role;
     private String phone;
 
+    // Campos migrados de Client
+    @Column(name = "company")
+    private String company;
+
+    @Column(name = "industry")
+    private String industry;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "website")
+    private String website;
+
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+
+    @Column(name = "last_contact")
+    private LocalDateTime lastContact;
+
+    @Column(name = "total_revenue")
+    private java.math.BigDecimal totalRevenue;
+
+    @Column(name = "total_projects")
+    private Integer totalProjects;
+
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
 
@@ -94,6 +119,70 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
+
+    public String getIndustry() {
+        return industry;
+    }
+
+    public void setIndustry(String industry) {
+        this.industry = industry;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public LocalDateTime getLastContact() {
+        return lastContact;
+    }
+
+    public void setLastContact(LocalDateTime lastContact) {
+        this.lastContact = lastContact;
+    }
+
+    public java.math.BigDecimal getTotalRevenue() {
+        return totalRevenue;
+    }
+
+    public void setTotalRevenue(java.math.BigDecimal totalRevenue) {
+        this.totalRevenue = totalRevenue;
+    }
+
+    public Integer getTotalProjects() {
+        return totalProjects;
+    }
+
+    public void setTotalProjects(Integer totalProjects) {
+        this.totalProjects = totalProjects;
     }
 
     public LocalDateTime getRegisteredAt() {

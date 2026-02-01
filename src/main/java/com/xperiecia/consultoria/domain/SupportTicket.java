@@ -19,8 +19,8 @@ public class SupportTicket {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    @JoinColumn(name = "client_user_id", nullable = false)
+    private User client;
 
     @Column(name = "title", nullable = false)
     private String title;

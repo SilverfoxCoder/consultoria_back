@@ -3,7 +3,7 @@ package com.xperiecia.consultoria.application;
 import com.xperiecia.consultoria.domain.Notification;
 import com.xperiecia.consultoria.domain.User;
 import com.xperiecia.consultoria.domain.UserRepository;
-import com.xperiecia.consultoria.domain.ClientRepository;
+// import com.xperiecia.consultoria.domain.ClientRepository;
 import com.xperiecia.consultoria.domain.BudgetRepository;
 import com.xperiecia.consultoria.domain.LoginHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+// import java.util.List; // Removed unused import
 import java.util.Map;
 import java.util.HashMap;
 
@@ -27,8 +27,8 @@ public class AdminNotificationService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private ClientRepository clientRepository;
+    // @Autowired
+    // private ClientRepository clientRepository; // Removed in refactoring
 
     @Autowired
     private BudgetRepository budgetRepository;
@@ -279,8 +279,8 @@ public class AdminNotificationService {
         // Presupuestos creados esta semana
         long newBudgetsWeek = budgetRepository.countByCreatedAtBetween(startOfWeek, endOfWeek);
 
-        // Clientes activos esta semana
-        long activeClientsWeek = clientRepository.countActiveInPeriod(startOfWeek.toLocalDate(), endOfWeek.toLocalDate());
+        // Clientes activos esta semana (Usuarios con rol CLIENT y actividad reciente)
+        long activeClientsWeek = userRepository.countByRoleAndLastContactBetween("CLIENT", startOfWeek, endOfWeek);
 
         stats.put("weekStart", startOfWeek.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         stats.put("weekEnd", endOfWeek.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
@@ -311,8 +311,8 @@ public class AdminNotificationService {
         // Presupuestos creados este mes
         long newBudgetsMonth = budgetRepository.countByCreatedAtBetween(startOfMonth, endOfMonth);
 
-        // Total de clientes
-        long totalClients = clientRepository.count();
+        // Total de clientes (Usuarios con rol CLIENT)
+        long totalClients = userRepository.countByRole("CLIENT");
 
         // Total de usuarios
         long totalUsers = userRepository.count();

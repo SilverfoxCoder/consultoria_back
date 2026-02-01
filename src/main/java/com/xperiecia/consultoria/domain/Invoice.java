@@ -26,8 +26,8 @@ public class Invoice {
     private String number;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    @JoinColumn(name = "client_user_id", nullable = false)
+    private User client;
 
     @Column(name = "issued_at")
     private LocalDate issuedAt;

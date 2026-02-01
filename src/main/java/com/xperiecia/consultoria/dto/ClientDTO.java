@@ -1,6 +1,6 @@
 package com.xperiecia.consultoria.dto;
 
-import com.xperiecia.consultoria.domain.Client;
+// import com.xperiecia.consultoria.domain.Client; // Removed
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -34,42 +34,54 @@ public class ClientDTO {
     private Integer totalProjects;
 
     // Constructor from Entity
-    public static ClientDTO fromEntity(Client client) {
+    // Constructor from Entity (User acting as Client)
+    public static ClientDTO fromEntity(com.xperiecia.consultoria.domain.User user) {
         ClientDTO dto = new ClientDTO();
-        dto.setId(client.getId());
-        dto.setName(client.getName());
-        dto.setContactPerson(client.getContactPerson());
-        dto.setEmail(client.getEmail());
-        dto.setPhone(client.getPhone());
-        dto.setCompany(client.getCompany());
-        dto.setIndustry(client.getIndustry());
-        dto.setStatus(client.getStatus());
-        dto.setAddress(client.getAddress());
-        dto.setWebsite(client.getWebsite());
-        dto.setNotes(client.getNotes());
-        dto.setLastContact(client.getLastContact());
-        dto.setTotalRevenue(client.getTotalRevenue());
-        dto.setTotalProjects(client.getTotalProjects());
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        // User uses 'name' as contact person implicitly or we use name
+        dto.setContactPerson(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setCompany(user.getCompany());
+        dto.setIndustry(user.getIndustry());
+        dto.setStatus(user.getStatus());
+        dto.setAddress(user.getAddress());
+        dto.setWebsite(user.getWebsite());
+        dto.setNotes(user.getNotes());
+        // dto.setLastContact(user.getLastContact()); // User entity might need
+        // LocalDateTime -> LocalDate conversion if types differ
+        // Assuming User has LocalDateTime lastContact, ClientDTO has LocalDate
+        if (user.getLastContact() != null) {
+            dto.setLastContact(user.getLastContact().toLocalDate());
+        }
+        dto.setTotalRevenue(user.getTotalRevenue());
+        dto.setTotalProjects(user.getTotalProjects());
         return dto;
     }
 
-    // Método para convertir DTO a Entity
-    public Client toEntity() {
-        Client client = new Client();
-        client.setId(this.id);
-        client.setName(this.name);
-        client.setContactPerson(this.contactPerson);
-        client.setEmail(this.email);
-        client.setPhone(this.phone);
-        client.setCompany(this.company);
-        client.setIndustry(this.industry);
-        client.setStatus(this.status);
-        client.setAddress(this.address);
-        client.setWebsite(this.website);
-        client.setNotes(this.notes);
-        client.setLastContact(this.lastContact);
-        client.setTotalRevenue(this.totalRevenue);
-        client.setTotalProjects(this.totalProjects);
-        return client;
+    // Método para convertir DTO a Entity (User)
+    public com.xperiecia.consultoria.domain.User toEntity() {
+        com.xperiecia.consultoria.domain.User user = new com.xperiecia.consultoria.domain.User();
+        if (this.id != null)
+            user.setId(this.id);
+        user.setName(this.name);
+        // user.setContactPerson(this.contactPerson); // User doesn't have this, uses
+        // name
+        user.setEmail(this.email);
+        user.setPhone(this.phone);
+        user.setCompany(this.company);
+        user.setIndustry(this.industry);
+        user.setStatus(this.status);
+        user.setAddress(this.address);
+        user.setWebsite(this.website);
+        user.setNotes(this.notes);
+        if (this.lastContact != null) {
+            user.setLastContact(this.lastContact.atStartOfDay());
+        }
+        user.setTotalRevenue(this.totalRevenue);
+        user.setTotalProjects(this.totalProjects);
+        user.setRole("CLIENT"); // Default role
+        return user;
     }
 }

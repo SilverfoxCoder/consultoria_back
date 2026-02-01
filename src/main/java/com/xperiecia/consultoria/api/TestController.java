@@ -1,7 +1,5 @@
 package com.xperiecia.consultoria.api;
 
-import com.xperiecia.consultoria.domain.Client;
-import com.xperiecia.consultoria.domain.ClientRepository;
 import com.xperiecia.consultoria.domain.Project;
 import com.xperiecia.consultoria.domain.ProjectRepository;
 import com.xperiecia.consultoria.domain.User;
@@ -16,14 +14,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/test")
 @Tag(name = "Test", description = "API para pruebas y datos de ejemplo")
 public class TestController {
-
-    @Autowired
-    private ClientRepository clientRepository;
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -46,39 +42,43 @@ public class TestController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // Crear cliente de prueba
-            Client testClient = new Client();
-            testClient.setName("Cliente de Prueba");
-            testClient.setContactPerson("Juan Pérez");
-            testClient.setEmail("juan@cliente.com");
-            testClient.setPhone("+34 123 456 789");
-            testClient.setCompany("Empresa de Prueba S.L.");
-            testClient.setIndustry("Tecnología");
-            testClient.setStatus("ACTIVO");
-            testClient.setAddress("Calle de Prueba 123, Madrid");
-            testClient.setWebsite("www.cliente.com");
-            testClient.setNotes("Cliente de prueba para desarrollo");
-            testClient.setLastContact(LocalDate.now());
-            testClient.setTotalRevenue(new BigDecimal("50000.00"));
-            testClient.setTotalProjects(3);
+            // Crear usuario que actuará como cliente
+            User testClientUser = new User();
+            testClientUser.setName("Cliente de Prueba");
+            testClientUser.setEmail("juan@cliente.com");
+            testClientUser.setPasswordHash("$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"); // admin123
+            testClientUser.setPhone("+34 123 456 789");
+            testClientUser.setRole("CLIENT"); // Rol importante
+            testClientUser.setStatus("active");
 
-            Client savedClient = clientRepository.save(testClient);
+            // Campos de perfil extendido
+            testClientUser.setCompany("Empresa de Prueba S.L.");
+            testClientUser.setIndustry("Tecnología");
+            testClientUser.setAddress("Calle de Prueba 123, Madrid");
+            testClientUser.setWebsite("www.cliente.com");
+            testClientUser.setNotes("Cliente de prueba para desarrollo");
+            // testClientUser.setLastContact(LocalDate.now()); // LocalDateTime required
+            // usually, adjust if needed
+            testClientUser.setTotalRevenue(new BigDecimal("50000.00"));
+            testClientUser.setTotalProjects(3);
 
-            // Crear usuario de prueba
-            User testUser = new User();
-            testUser.setName("Usuario de Prueba");
-            testUser.setEmail("admin@test.com");
-            testUser.setPasswordHash("$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"); // admin123
-            testUser.setPhone("+34 987 654 321");
-            testUser.setRole("ADMIN");
-            testUser.setStatus("ACTIVO");
+            User savedClientUser = userRepository.save(testClientUser);
 
-            User savedUser = userRepository.save(testUser);
+            // Crear usuario admin
+            User testAdminUser = new User();
+            testAdminUser.setName("Usuario Admin");
+            testAdminUser.setEmail("admin@test.com");
+            testAdminUser.setPasswordHash("$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"); // admin123
+            testAdminUser.setPhone("+34 987 654 321");
+            testAdminUser.setRole("ADMIN");
+            testAdminUser.setStatus("active");
 
-            // Crear proyecto de prueba
+            User savedAdminUser = userRepository.save(testAdminUser);
+
+            // Crear proyecto de prueba asignado al usuario cliente
             Project testProject = new Project();
             testProject.setName("Proyecto de Prueba");
-            testProject.setClient(savedClient);
+            testProject.setClient(savedClientUser); // Asignar el usuario cliente
             testProject.setStatus(Project.ProjectStatus.PLANIFICACION);
             testProject.setProgress(0);
             testProject.setStartDate(LocalDate.now());
@@ -92,8 +92,8 @@ public class TestController {
             Project savedProject = projectRepository.save(testProject);
 
             response.put("message", "Datos de prueba creados exitosamente");
-            response.put("clientId", savedClient.getId());
-            response.put("userId", savedUser.getId());
+            response.put("clientId", savedClientUser.getId());
+            response.put("userId", savedAdminUser.getId());
             response.put("projectId", savedProject.getId());
 
             return ResponseEntity.ok(response);
@@ -105,9 +105,9 @@ public class TestController {
     }
 
     @GetMapping("/clients")
-    @Operation(summary = "Obtener todos los clientes")
-    public ResponseEntity<Iterable<Client>> getAllClients() {
-        return ResponseEntity.ok(clientRepository.findAll());
+    @Operation(summary = "Obtener todos los clientes (Usuarios con rol CLIENT)")
+    public ResponseEntity<List<User>> getAllClients() {
+        return ResponseEntity.ok(userRepository.findByRole("CLIENT"));
     }
 
     @GetMapping("/users")

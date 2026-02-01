@@ -21,10 +21,10 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
     /**
      * Buscar presupuestos por cliente
      * 
-     * @param clientId ID del cliente
+     * @param clientId ID del cliente (Usuario)
      * @return Lista de presupuestos del cliente
      */
-    List<Budget> findByClientId(Long clientId);
+    List<Budget> findByClient_Id(Long clientId);
 
     /**
      * Buscar presupuestos por estado
@@ -56,7 +56,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
      * @param status   Estado del presupuesto
      * @return Lista de presupuestos del cliente con el estado especificado
      */
-    List<Budget> findByClientIdAndStatus(Long clientId, Budget.BudgetStatus status);
+    List<Budget> findByClient_IdAndStatus(Long clientId, Budget.BudgetStatus status);
 
     /**
      * Obtener presupuestos ordenados por fecha de creación (más recientes primero)
@@ -71,7 +71,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
      * @param clientId ID del cliente
      * @return Lista de presupuestos del cliente ordenados
      */
-    List<Budget> findByClientIdOrderByCreatedAtDesc(Long clientId);
+    List<Budget> findByClient_IdOrderByCreatedAtDesc(Long clientId);
 
     /**
      * Obtener estadísticas de presupuestos
@@ -92,7 +92,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
 
     @Query("SELECT COUNT(b) FROM Budget b WHERE b.status = 'RECHAZADO'")
     long getRejectedBudgets();
-    
+
     /**
      * Contar presupuestos creados entre dos fechas
      */

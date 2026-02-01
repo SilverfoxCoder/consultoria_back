@@ -8,13 +8,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
+// Imports removed as they are unused or fully qualified in code
 
 @Component
 public class GoogleSearchProvider {

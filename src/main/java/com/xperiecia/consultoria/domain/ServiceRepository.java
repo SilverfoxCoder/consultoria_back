@@ -8,11 +8,11 @@ import java.util.List;
 @Repository
 public interface ServiceRepository extends JpaRepository<Service, Long> {
 
-    List<Service> findByClientId(Long clientId);
+    List<Service> findByClient_Id(Long clientId);
 
     List<Service> findByStatus(String status);
 
     List<Service> findByType(String type);
 
-    List<Service> findByClientIdAndStatus(Long clientId, String status);
+    List<Service> findByClient_IdAndStatus(Long clientId, String status);
 }

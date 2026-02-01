@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.math.BigDecimal;
+// import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -48,8 +48,8 @@ public class Budget {
     private String additionalInfo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    @JoinColumn(name = "client_user_id", nullable = false)
+    private User client;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

@@ -4,8 +4,6 @@ import com.xperiecia.consultoria.domain.User;
 import com.xperiecia.consultoria.domain.UserRepository;
 import com.xperiecia.consultoria.domain.LoginHistory;
 import com.xperiecia.consultoria.domain.LoginHistoryRepository;
-import com.xperiecia.consultoria.domain.Client;
-import com.xperiecia.consultoria.domain.ClientRepository;
 import com.xperiecia.consultoria.domain.Notification;
 import com.xperiecia.consultoria.dto.LoginRequest;
 import com.xperiecia.consultoria.dto.LoginResponse;
@@ -43,9 +41,6 @@ public class AuthController {
 
     @Autowired
     private LoginHistoryRepository loginHistoryRepository;
-
-    @Autowired
-    private ClientRepository clientRepository;
 
     @Autowired
     private com.xperiecia.consultoria.application.NotificationService notificationService;
@@ -95,16 +90,18 @@ public class AuthController {
             newUser.setStatus("active");
             newUser.setRegisteredAt(LocalDateTime.now());
 
+            // Si es cliente, inicializar campos específicos si es necesario (por ahora
+            // vacíos)
+            if ("CLIENT".equalsIgnoreCase(role) || "CLIENTE".equalsIgnoreCase(role)) {
+                // newUser.setContactPerson(newUser.getName()); // Por defecto usaremos name
+            }
+
             User savedUser = userRepository.save(newUser);
             System.out.println("✅ Nuevo usuario registrado: " + savedUser.getEmail() + " con rol: " + role);
 
-            // Si es cliente, crear entidad Client
             Long clientId = null;
             if ("CLIENT".equalsIgnoreCase(role) || "CLIENTE".equalsIgnoreCase(role)) {
-                Client client = getOrCreateClientForUser(savedUser);
-                if (client != null) {
-                    clientId = client.getId();
-                }
+                clientId = savedUser.getId();
             }
 
             // Enviar notificación de bienvenida
@@ -119,12 +116,14 @@ public class AuthController {
             response.setMessage("Registro exitoso");
             response.setToken("token_" + savedUser.getId() + "_" + System.currentTimeMillis());
 
+            Long finalClientId = clientId; // Parametro efectivo final para lambda/map
+
             Map<String, Object> userMap = new HashMap<>();
             userMap.put("id", savedUser.getId());
             userMap.put("name", savedUser.getName());
             userMap.put("email", savedUser.getEmail());
             userMap.put("role", savedUser.getRole());
-            userMap.put("clientId", clientId);
+            userMap.put("clientId", finalClientId);
 
             response.setUser(userMap);
 
@@ -159,7 +158,6 @@ public class AuthController {
                 // En producción usar BCrypt.checkpw()
                 boolean passwordValid = false;
 
-                // Para desarrollo, aceptar contraseñas simples
                 // Para desarrollo, aceptar contraseñas simples o verificar hash
                 if (loginRequest.getPassword().equals("password") ||
                         loginRequest.getPassword().equals("admin123") ||
@@ -181,8 +179,13 @@ public class AuthController {
                     response.setMessage("Login exitoso");
                     response.setToken("token_" + user.getId() + "_" + System.currentTimeMillis());
 
-                    // Resolver clientId si aplica
-                    Long clientId = resolveClientId(user);
+                    // Resolver clientId si aplica (ahora es el mismo ID del usuario si es cliente)
+                    Long clientId = null;
+                    if ("client".equalsIgnoreCase(user.getRole()) || "cliente".equalsIgnoreCase(user.getRole())) {
+                        clientId = user.getId();
+                    }
+
+                    Long finalClientId = clientId;
 
                     response.setUser(new HashMap<>() {
                         {
@@ -193,7 +196,7 @@ public class AuthController {
                             put("roles", user.getRoles() != null ? user.getRoles().stream()
                                     .map(r -> r.getName())
                                     .collect(java.util.stream.Collectors.toList()) : java.util.Collections.emptyList());
-                            put("clientId", clientId);
+                            put("clientId", finalClientId);
                         }
                     });
 
@@ -257,11 +260,11 @@ public class AuthController {
      */
     @GetMapping("/first-login/{userId}")
     @Operation(summary = "Verificar si es el primer login")
-    public ResponseEntity<Map<String, Object>> checkFirstLogin(@PathVariable Long userId) {
+    public ResponseEntity<Map<String, Object>> checkFirstLogin(@PathVariable long userId) {
         try {
             Optional<User> userOptional = userRepository.findById(userId);
             if (userOptional.isPresent()) {
-                User user = userOptional.get();
+                // User user = userOptional.get();
 
                 // Verificar si el usuario tiene historial de login
                 List<LoginHistory> loginHistory = loginHistoryRepository.findByUser_Id(userId);
@@ -335,14 +338,13 @@ public class AuthController {
                 }
                 newUser.setRole(role);
 
+                if ("client".equalsIgnoreCase(role) || "cliente".equalsIgnoreCase(role)) {
+                    // newUser.setContactPerson(name); // Removed as User uses name
+                }
+
                 newUser.setPasswordHash("google_oauth_" + googleId);
                 user = userRepository.save(newUser);
                 System.out.println("✅ Nuevo usuario creado y autenticado: " + email + " con rol: " + role);
-
-                // Si el rol es 'client', crear automáticamente la entrada en la tabla clients
-                if ("client".equalsIgnoreCase(role) || "cliente".equalsIgnoreCase(role)) {
-                    getOrCreateClientForUser(user);
-                }
 
                 // Crear notificación de bienvenida para nuevo usuario
                 notificationService.createWelcomeNotification(user.getId(), user.getName());
@@ -375,7 +377,11 @@ public class AuthController {
             }
 
             // Asegurar clientId si rol = client
-            Long clientId = resolveClientId(user);
+            Long clientId = null;
+            if ("client".equalsIgnoreCase(user.getRole()) || "cliente".equalsIgnoreCase(user.getRole())) {
+                clientId = user.getId();
+            }
+            Long finalClientId = clientId;
 
             // Crear respuesta exitosa
             LoginResponse response = new LoginResponse();
@@ -390,7 +396,7 @@ public class AuthController {
             userMap.put("roles", user.getRoles() != null ? user.getRoles().stream()
                     .map(r -> r.getName())
                     .collect(java.util.stream.Collectors.toList()) : java.util.Collections.emptyList());
-            userMap.put("clientId", clientId);
+            userMap.put("clientId", finalClientId);
             response.setUser(userMap);
 
             return ResponseEntity.ok(response);
@@ -449,14 +455,13 @@ public class AuthController {
                 }
                 newUser.setRole(role);
 
+                if ("client".equalsIgnoreCase(role) || "cliente".equalsIgnoreCase(role)) {
+                    // newUser.setContactPerson(name); // Removed as User uses name
+                }
+
                 newUser.setPasswordHash("google_oauth_" + googleId);
                 user = userRepository.save(newUser);
                 System.out.println("✅ Nuevo usuario creado: " + email + " con rol: " + role);
-
-                // Si el rol es 'client', crear automáticamente la entrada en la tabla clients
-                if ("client".equalsIgnoreCase(role) || "cliente".equalsIgnoreCase(role)) {
-                    getOrCreateClientForUser(user);
-                }
 
                 // Crear notificación de bienvenida para nuevo usuario
                 notificationService.createWelcomeNotification(user.getId(), user.getName());
@@ -489,7 +494,11 @@ public class AuthController {
             }
 
             // Asegurar clientId si rol = client
-            Long clientId = resolveClientId(user);
+            Long clientId = null;
+            if ("client".equalsIgnoreCase(user.getRole()) || "cliente".equalsIgnoreCase(user.getRole())) {
+                clientId = user.getId();
+            }
+            Long finalClientId = clientId;
 
             // Crear respuesta exitosa
             LoginResponse response = new LoginResponse();
@@ -505,7 +514,7 @@ public class AuthController {
                     put("roles", user.getRoles() != null ? user.getRoles().stream()
                             .map(r -> r.getName())
                             .collect(java.util.stream.Collectors.toList()) : java.util.Collections.emptyList());
-                    put("clientId", clientId);
+                    put("clientId", finalClientId);
                 }
             });
 
@@ -530,7 +539,7 @@ public class AuthController {
     @Operation(summary = "Cambiar contraseña del usuario")
     public ResponseEntity<Map<String, Object>> changePassword(@RequestBody ChangePasswordRequest request) {
         try {
-            Optional<User> userOptional = userRepository.findById(request.getUserId());
+            Optional<User> userOptional = userRepository.findById(request.getUserId().longValue());
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
 
@@ -590,53 +599,6 @@ public class AuthController {
     }
 
     /**
-     * Resolver el ID del cliente para un usuario dado.
-     * Si el usuario tiene rol 'client', busca o crea el cliente correspondiente.
-     * 
-     * @param user Usuario autenticado
-     * @return ID del cliente o null si no aplica
-     */
-    private Long resolveClientId(User user) {
-        if ("client".equalsIgnoreCase(user.getRole()) || "cliente".equalsIgnoreCase(user.getRole())) {
-            Optional<Client> clientOpt = clientRepository.findByEmail(user.getEmail());
-            Client client = clientOpt.orElseGet(() -> getOrCreateClientForUser(user));
-            return client != null ? client.getId() : null;
-        }
-        return null;
-    }
-
-    /**
-     * Crear entrada de cliente automáticamente cuando un usuario tiene rol 'client'
-     * 
-     * @param user Usuario para el cual crear el cliente
-     */
-    private Client getOrCreateClientForUser(User user) {
-        try {
-            // Evitar duplicados: buscar por email
-            Optional<Client> existing = clientRepository.findByEmail(user.getEmail());
-            if (existing.isPresent()) {
-                return existing.get();
-            }
-
-            Client newClient = new Client();
-            newClient.setName(user.getName());
-            newClient.setEmail(user.getEmail());
-            newClient.setPhone(user.getPhone());
-            newClient.setContactPerson(user.getName());
-            newClient.setStatus("active");
-
-            Client savedClient = clientRepository.save(newClient);
-            System.out.println("✅ Cliente creado automáticamente: " + savedClient.getName() + " (ID: "
-                    + savedClient.getId() + ")");
-            return savedClient;
-
-        } catch (Exception e) {
-            System.err.println("❌ Error creando/obteniendo cliente automáticamente: " + e.getMessage());
-            return null;
-        }
-    }
-
-    /**
      * Eliminar un usuario
      * 
      * @param userId ID del usuario a eliminar
@@ -644,7 +606,7 @@ public class AuthController {
      */
     @DeleteMapping("/user/{userId}")
     @Operation(summary = "Eliminar usuario")
-    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable Long userId) {
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable long userId) {
         try {
             System.out.println("🗑️ Eliminando usuario con ID: " + userId);
 
@@ -657,17 +619,6 @@ public class AuthController {
             }
 
             User user = userOptional.get();
-
-            // Si el usuario tiene rol 'client', también eliminar de la tabla clients
-            if ("client".equalsIgnoreCase(user.getRole()) || "cliente".equalsIgnoreCase(user.getRole())) {
-                clientRepository.findAll().stream()
-                        .filter(client -> client.getEmail().equals(user.getEmail()))
-                        .findFirst()
-                        .ifPresent(client -> {
-                            clientRepository.delete(client);
-                            System.out.println("✅ Cliente relacionado eliminado: " + client.getName());
-                        });
-            }
 
             userRepository.delete(user);
 
@@ -685,57 +636,6 @@ public class AuthController {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("message", "Error al eliminar el usuario");
-            errorResponse.put("error", e.getMessage());
-
-            return ResponseEntity.internalServerError().body(errorResponse);
-        }
-    }
-
-    /**
-     * Eliminar un cliente (y el usuario relacionado si existe)
-     * 
-     * @param clientId ID del cliente a eliminar
-     * @return Respuesta de confirmación
-     */
-    @DeleteMapping("/client/{clientId}")
-    @Operation(summary = "Eliminar cliente")
-    public ResponseEntity<Map<String, Object>> deleteClient(@PathVariable Long clientId) {
-        try {
-            System.out.println("🗑️ Eliminando cliente con ID: " + clientId);
-
-            Optional<Client> clientOptional = clientRepository.findById(clientId);
-            if (clientOptional.isEmpty()) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Cliente no encontrado");
-                return ResponseEntity.notFound().build();
-            }
-
-            Client client = clientOptional.get();
-
-            // Buscar y eliminar usuario relacionado si existe
-            userRepository.findByEmail(client.getEmail())
-                    .ifPresent(user -> {
-                        userRepository.delete(user);
-                        System.out.println("✅ Usuario relacionado eliminado: " + user.getName());
-                    });
-
-            clientRepository.delete(client);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Cliente eliminado correctamente");
-            response.put("clientId", clientId);
-
-            System.out.println("✅ Cliente eliminado correctamente: " + client.getName());
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            System.err.println("❌ Error eliminando cliente: " + e.getMessage());
-
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("message", "Error al eliminar el cliente");
             errorResponse.put("error", e.getMessage());
 
             return ResponseEntity.internalServerError().body(errorResponse);

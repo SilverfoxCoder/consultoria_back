@@ -28,8 +28,8 @@ public class DashboardController {
     @Autowired
     private ProjectRepository projectRepository;
 
-    @Autowired
-    private ClientRepository clientRepository;
+    // @Autowired
+    // private ClientRepository clientRepository; // Removed
 
     @Autowired
     private UserRepository userRepository;
@@ -53,13 +53,13 @@ public class DashboardController {
 
             // Métricas principales
             Map<String, Object> metrics = new HashMap<>();
-            
+
             // Proyectos
             long totalProjects = projectRepository.count();
             long activeProjects = projectRepository.countByStatus(Project.ProjectStatus.EN_PROGRESO);
             long planningProjects = projectRepository.countByStatus(Project.ProjectStatus.PLANIFICACION);
             long completedProjects = projectRepository.countByStatus(Project.ProjectStatus.COMPLETADO);
-            
+
             Map<String, Object> projects = new HashMap<>();
             projects.put("total", totalProjects);
             projects.put("active", activeProjects);
@@ -67,11 +67,11 @@ public class DashboardController {
             projects.put("completed", completedProjects);
             metrics.put("projects", projects);
 
-            // Clientes
-            long totalClients = clientRepository.count();
-            long activeClients = clientRepository.findByStatus("Activo").size();
-            long prospectClients = clientRepository.findByStatus("Prospecto").size();
-            
+            // Clientes (migrado a UserRepository)
+            long totalClients = userRepository.countByRole("CLIENT");
+            long activeClients = userRepository.countByRoleAndStatus("CLIENT", "Activo");
+            long prospectClients = userRepository.countByRoleAndStatus("CLIENT", "Prospecto");
+
             Map<String, Object> clients = new HashMap<>();
             clients.put("total", totalClients);
             clients.put("active", activeClients);
@@ -80,8 +80,8 @@ public class DashboardController {
 
             // Usuarios
             long totalUsers = userRepository.count();
-            long activeUsers = userRepository.count();
-            
+            long activeUsers = userRepository.count(); // TODO: filtrar por status si es necesario
+
             Map<String, Object> users = new HashMap<>();
             users.put("total", totalUsers);
             users.put("active", activeUsers);
@@ -92,7 +92,7 @@ public class DashboardController {
             long draftInvoices = invoiceRepository.countByStatus(Invoice.InvoiceStatus.BORRADOR);
             long sentInvoices = invoiceRepository.countByStatus(Invoice.InvoiceStatus.ENVIADA);
             long paidInvoices = invoiceRepository.countByStatus(Invoice.InvoiceStatus.PAGADA);
-            
+
             Map<String, Object> invoices = new HashMap<>();
             invoices.put("total", totalInvoices);
             invoices.put("draft", draftInvoices);
@@ -105,7 +105,7 @@ public class DashboardController {
             long pendingTasks = taskRepository.countByStatus(Task.TaskStatus.PENDIENTE);
             long inProgressTasks = taskRepository.countByStatus(Task.TaskStatus.EN_PROGRESO);
             long completedTasks = taskRepository.countByStatus(Task.TaskStatus.COMPLETADA);
-            
+
             Map<String, Object> tasks = new HashMap<>();
             tasks.put("total", totalTasks);
             tasks.put("pending", pendingTasks);
@@ -142,8 +142,8 @@ public class DashboardController {
             // Contadores principales
             summary.put("totalProjects", projectRepository.count());
             summary.put("activeProjects", projectRepository.countByStatus(Project.ProjectStatus.EN_PROGRESO));
-            summary.put("totalClients", clientRepository.count());
-            summary.put("activeClients", clientRepository.findByStatus("Activo").size());
+            summary.put("totalClients", userRepository.countByRole("CLIENT"));
+            summary.put("activeClients", userRepository.countByRoleAndStatus("CLIENT", "Activo"));
             summary.put("totalUsers", userRepository.count());
             summary.put("totalInvoices", invoiceRepository.count());
             summary.put("totalTasks", taskRepository.count());
@@ -161,4 +161,4 @@ public class DashboardController {
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
-} 
+}
