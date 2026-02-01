@@ -14,6 +14,7 @@ public class ProjectTeamDTO {
     private String projectName;
     private String name;
     private String role;
+    private Long userId;
 
     // Constructor from Entity
     public static ProjectTeamDTO fromEntity(ProjectTeam projectTeam) {
@@ -23,6 +24,7 @@ public class ProjectTeamDTO {
         dto.setProjectName(projectTeam.getProject() != null ? projectTeam.getProject().getName() : null);
         dto.setName(projectTeam.getName());
         dto.setRole(projectTeam.getRole());
+        dto.setUserId(projectTeam.getUser() != null ? projectTeam.getUser().getId() : null);
         return dto;
     }
 
@@ -32,7 +34,7 @@ public class ProjectTeamDTO {
         projectTeam.setId(this.id);
         projectTeam.setName(this.name);
         projectTeam.setRole(this.role);
-        // El project se manejaría por separado si es necesario
+        // El project y user se manejarían por separado si es necesario
         return projectTeam;
     }
 }

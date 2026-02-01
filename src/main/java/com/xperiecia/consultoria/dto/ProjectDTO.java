@@ -92,6 +92,9 @@ public class ProjectDTO {
     /** Lista de nombres de miembros del equipo */
     private List<String> team;
 
+    /** IDs de los miembros del equipo (para entrada) */
+    private List<Long> teamMemberIds;
+
     // Campos comentados para futuras implementaciones
     // private LocalDateTime createdAt;
     // private LocalDateTime updatedAt;

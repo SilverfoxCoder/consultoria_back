@@ -43,6 +43,9 @@ public class ProjectTeamController {
     @Autowired
     private ProjectRepository projectRepository;
 
+    @Autowired
+    private com.xperiecia.consultoria.domain.UserRepository userRepository;
+
     /**
      * Obtiene todos los miembros de equipos de proyecto del sistema
      * 
@@ -130,6 +133,15 @@ public class ProjectTeamController {
         projectTeam.setName(projectTeamDTO.getName());
         projectTeam.setRole(projectTeamDTO.getRole());
 
+        // Asignar usuario si se proporciona el ID
+        if (projectTeamDTO.getUserId() != null) {
+            com.xperiecia.consultoria.domain.User user = userRepository.findById(projectTeamDTO.getUserId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Usuario no encontrado con ID: " + projectTeamDTO.getUserId()));
+            projectTeam.setUser(user);
+            projectTeam.setName(user.getName()); // Sobreescribimos el nombre con el del usuario real
+        }
+
         // Guardar en base de datos y retornar DTO
         ProjectTeam savedProjectTeam = projectTeamRepository.save(projectTeam);
         return ProjectTeamDTO.fromEntity(savedProjectTeam);
@@ -155,7 +167,7 @@ public class ProjectTeamController {
         if (teamMember.isPresent()) {
             ProjectTeam updatedMember = teamMember.get();
 
-            // Actualizar el proyecto si se proporciona un nuevo projectId
+            // Actualizar proyecto si se proporciona un nuevo projectId
             if (teamDetails.getProjectId() != null) {
                 Project project = projectRepository.findById(teamDetails.getProjectId())
                         .orElseThrow(() -> new RuntimeException(
@@ -163,9 +175,26 @@ public class ProjectTeamController {
                 updatedMember.setProject(project);
             }
 
-            // Actualizar nombre y rol
-            updatedMember.setName(teamDetails.getName());
-            updatedMember.setRole(teamDetails.getRole());
+            // Actualizar usuario si se proporciona ID (o limpiar si es necesario, pero aquí
+            // solo añadimos)
+            if (teamDetails.getUserId() != null) {
+                com.xperiecia.consultoria.domain.User user = userRepository.findById(teamDetails.getUserId())
+                        .orElseThrow(() -> new RuntimeException(
+                                "Usuario no encontrado con ID: " + teamDetails.getUserId()));
+                updatedMember.setUser(user);
+                updatedMember.setName(user.getName());
+            } else if (teamDetails.getName() != null) {
+                // Solo actualizar nombre si no hay usuario vinculado o si se quiere cambiar
+                // manualmente
+                // (Aunque si hay usuario vinculado, debería prevalecer su nombre, por ahora lo
+                // dejamos flexible)
+                updatedMember.setName(teamDetails.getName());
+            }
+
+            // Actualizar rol
+            if (teamDetails.getRole() != null) {
+                updatedMember.setRole(teamDetails.getRole());
+            }
 
             // Guardar cambios y retornar DTO
             ProjectTeam savedProjectTeam = projectTeamRepository.save(updatedMember);

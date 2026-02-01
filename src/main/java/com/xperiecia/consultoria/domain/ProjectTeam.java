@@ -20,6 +20,10 @@ public class ProjectTeam {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(name = "name", nullable = false)
     private String name;
 

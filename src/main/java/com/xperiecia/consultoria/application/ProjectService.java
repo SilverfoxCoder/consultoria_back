@@ -94,6 +94,7 @@ public class ProjectService {
 
                     ProjectTeam teamMember = new ProjectTeam();
                     teamMember.setProject(savedProject);
+                    teamMember.setUser(user); // Set the user relationship
                     teamMember.setName(user.getName()); // Usamos el nombre del usuario
                     teamMember.setRole("Consultor"); // Rol por defecto
 
@@ -148,6 +149,7 @@ public class ProjectService {
 
                     ProjectTeam teamMember = new ProjectTeam();
                     teamMember.setProject(updatedProject);
+                    teamMember.setUser(user); // Set the user relationship
                     teamMember.setName(user.getName());
                     teamMember.setRole("Consultor");
 
