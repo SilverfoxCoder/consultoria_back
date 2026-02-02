@@ -28,7 +28,7 @@ public class ClientController {
     @Operation(summary = "Obtener todos los clientes")
     public List<ClientDTO> getAllClients() {
         // Enforce fetching only users with ROLE 'CLIENT'
-        return userRepository.findByRoleIgnoreCase("CLIENT").stream()
+        return userRepository.findByRoleIgnoreCase("Cliente").stream()
                 .map(ClientDTO::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -60,7 +60,7 @@ public class ClientController {
     public ClientDTO createClient(@RequestBody ClientDTO clientDTO) {
         User user = clientDTO.toEntity();
         // Ensure role is set
-        user.setRole("CLIENT");
+        user.setRole("Cliente");
         // Ensure password hash (mock for now if not provided, or handle creation logic)
         if (user.getPasswordHash() == null) {
             user.setPasswordHash("$2a$10$defaultHashForClient");

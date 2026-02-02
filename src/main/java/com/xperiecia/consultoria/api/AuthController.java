@@ -79,28 +79,27 @@ public class AuthController {
             // Hashear contraseña
             newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
-            // Asignar rol (por defecto CLIENT si no se especifica, o forzar CLIENT para
-            // registros públicos)
-            // Aquí permitimos que el front envíe el rol, pero podríamos restringirlo
+            // Asignar rol (por defecto Cliente si no se especifica)
             String role = request.getRole();
             if (role == null || role.trim().isEmpty()) {
-                role = "CLIENT";
+                role = "Cliente";
+            } else if ("client".equalsIgnoreCase(role) || "cliente".equalsIgnoreCase(role)) {
+                role = "Cliente";
             }
             newUser.setRole(role);
             newUser.setStatus("active");
             newUser.setRegisteredAt(LocalDateTime.now());
 
-            // Si es cliente, inicializar campos específicos si es necesario (por ahora
-            // vacíos)
-            if ("CLIENT".equalsIgnoreCase(role) || "CLIENTE".equalsIgnoreCase(role)) {
-                // newUser.setContactPerson(newUser.getName()); // Por defecto usaremos name
+            // Si es cliente, inicializar campos específicos si es necesario
+            if ("Cliente".equalsIgnoreCase(role) || "CLIENTE".equalsIgnoreCase(role)) {
+                // newUser.setContactPerson(newUser.getName());
             }
 
             User savedUser = userRepository.save(newUser);
             System.out.println("✅ Nuevo usuario registrado: " + savedUser.getEmail() + " con rol: " + role);
 
             Long clientId = null;
-            if ("CLIENT".equalsIgnoreCase(role) || "CLIENTE".equalsIgnoreCase(role)) {
+            if ("Cliente".equalsIgnoreCase(role) || "CLIENTE".equalsIgnoreCase(role)) {
                 clientId = savedUser.getId();
             }
 
@@ -181,7 +180,8 @@ public class AuthController {
 
                     // Resolver clientId si aplica (ahora es el mismo ID del usuario si es cliente)
                     Long clientId = null;
-                    if ("client".equalsIgnoreCase(user.getRole()) || "cliente".equalsIgnoreCase(user.getRole())) {
+                    if ("Cliente".equalsIgnoreCase(user.getRole()) || "client".equalsIgnoreCase(user.getRole())
+                            || "CLIENTE".equalsIgnoreCase(user.getRole())) {
                         clientId = user.getId();
                     }
 
@@ -330,15 +330,17 @@ public class AuthController {
                 newUser.setName(name);
                 newUser.setEmail(email);
 
-                // Usar el rol que viene de los datos de Google, por defecto 'client' para
+                // Usar el rol que viene de los datos de Google, por defecto 'Cliente' para
                 // registros web
                 String role = (String) googleData.get("role");
                 if (role == null || role.trim().isEmpty()) {
-                    role = "client"; // Por defecto, usuarios web son clientes
+                    role = "Cliente"; // Por defecto, usuarios web son clientes
+                } else if ("client".equalsIgnoreCase(role) || "cliente".equalsIgnoreCase(role)) {
+                    role = "Cliente";
                 }
                 newUser.setRole(role);
 
-                if ("client".equalsIgnoreCase(role) || "cliente".equalsIgnoreCase(role)) {
+                if ("Cliente".equalsIgnoreCase(role) || "CLIENTE".equalsIgnoreCase(role)) {
                     // newUser.setContactPerson(name); // Removed as User uses name
                 }
 
@@ -378,7 +380,8 @@ public class AuthController {
 
             // Asegurar clientId si rol = client
             Long clientId = null;
-            if ("client".equalsIgnoreCase(user.getRole()) || "cliente".equalsIgnoreCase(user.getRole())) {
+            if ("Cliente".equalsIgnoreCase(user.getRole()) || "client".equalsIgnoreCase(user.getRole())
+                    || "CLIENTE".equalsIgnoreCase(user.getRole())) {
                 clientId = user.getId();
             }
             Long finalClientId = clientId;
@@ -447,15 +450,17 @@ public class AuthController {
                 newUser.setName(name);
                 newUser.setEmail(email);
 
-                // Usar el rol que viene de los datos de Google, por defecto 'client' para
+                // Usar el rol que viene de los datos de Google, por defecto 'Cliente' para
                 // registros web
                 String role = (String) googleData.get("role");
                 if (role == null || role.trim().isEmpty()) {
-                    role = "client"; // Por defecto, usuarios web son clientes
+                    role = "Cliente"; // Por defecto, usuarios web son clientes
+                } else if ("client".equalsIgnoreCase(role) || "cliente".equalsIgnoreCase(role)) {
+                    role = "Cliente";
                 }
                 newUser.setRole(role);
 
-                if ("client".equalsIgnoreCase(role) || "cliente".equalsIgnoreCase(role)) {
+                if ("Cliente".equalsIgnoreCase(role) || "CLIENTE".equalsIgnoreCase(role)) {
                     // newUser.setContactPerson(name); // Removed as User uses name
                 }
 
@@ -495,7 +500,8 @@ public class AuthController {
 
             // Asegurar clientId si rol = client
             Long clientId = null;
-            if ("client".equalsIgnoreCase(user.getRole()) || "cliente".equalsIgnoreCase(user.getRole())) {
+            if ("Cliente".equalsIgnoreCase(user.getRole()) || "client".equalsIgnoreCase(user.getRole())
+                    || "CLIENTE".equalsIgnoreCase(user.getRole())) {
                 clientId = user.getId();
             }
             Long finalClientId = clientId;
