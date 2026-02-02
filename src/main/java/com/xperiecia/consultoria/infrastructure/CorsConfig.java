@@ -84,7 +84,7 @@ public class CorsConfig implements WebMvcConfigurer {
         @Override
         public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**") // Aplicar a todos los endpoints
-                                .allowedOriginPatterns("*") // Permitir todos los orígenes
+                                .allowedOrigins(ALLOWED_ORIGINS.toArray(new String[0])) // Permitir orígenes explícitos
                                 .allowedMethods(ALLOWED_METHODS.toArray(new String[0]))
                                 .allowedHeaders(ALLOWED_HEADERS.toArray(new String[0])) // Permitir todos los headers
                                 .exposedHeaders(EXPOSED_HEADERS.toArray(new String[0])) // Headers expuestos al frontend
@@ -93,7 +93,7 @@ public class CorsConfig implements WebMvcConfigurer {
 
                 // Configuración específica para WebSocket de notificaciones
                 registry.addMapping("/ws/**")
-                                .allowedOriginPatterns("*")
+                                .allowedOrigins(ALLOWED_ORIGINS.toArray(new String[0]))
                                 .allowedMethods("*")
                                 .allowedHeaders("*")
                                 .allowCredentials(true);
@@ -117,9 +117,8 @@ public class CorsConfig implements WebMvcConfigurer {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
 
-                // Configurar orígenes permitidos (Patrón * para máxima compatibilidad) - Force
-                // Redeploy
-                configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+                // Configurar orígenes permitidos (Explícito para seguridad)
+                configuration.setAllowedOrigins(ALLOWED_ORIGINS);
 
                 // Configurar métodos permitidos
                 configuration.setAllowedMethods(ALLOWED_METHODS);
