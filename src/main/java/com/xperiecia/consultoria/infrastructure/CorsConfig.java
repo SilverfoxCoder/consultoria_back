@@ -97,7 +97,7 @@ public class CorsConfig implements WebMvcConfigurer {
         @Override
         public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**") // Aplicar a todos los endpoints
-                                .allowedOrigins(ALLOWED_ORIGINS.toArray(new String[0])) // Frontend específico
+                                .allowedOriginPatterns("*") // Permitir todos los orígenes
                                 .allowedMethods(ALLOWED_METHODS.toArray(new String[0]))
                                 .allowedHeaders(ALLOWED_HEADERS.toArray(new String[0])) // Permitir todos los headers
                                 .exposedHeaders(EXPOSED_HEADERS.toArray(new String[0])) // Headers expuestos al frontend
@@ -106,13 +106,13 @@ public class CorsConfig implements WebMvcConfigurer {
 
                 // Configuración específica para WebSocket de notificaciones
                 registry.addMapping("/ws/**")
-                                .allowedOrigins(ALLOWED_ORIGINS.toArray(new String[0]))
+                                .allowedOriginPatterns("*")
                                 .allowedMethods("*")
                                 .allowedHeaders("*")
                                 .allowCredentials(true);
 
-                System.out.println("✅ CORS configurado correctamente:");
-                System.out.println("   - Orígenes permitidos: " + String.join(", ", ALLOWED_ORIGINS));
+                System.out.println("✅ CORS configurado correctamente (PERMISIVO):");
+                System.out.println("   - Orígenes permitidos: * (Pattern)");
                 System.out.println("   - Métodos permitidos: " + String.join(", ", ALLOWED_METHODS));
                 System.out.println("   - Endpoints API: /**");
                 System.out.println("   - Endpoints WebSocket: /ws/**");
