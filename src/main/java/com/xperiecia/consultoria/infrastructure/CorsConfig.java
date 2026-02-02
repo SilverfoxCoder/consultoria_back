@@ -131,7 +131,8 @@ public class CorsConfig implements WebMvcConfigurer {
                 CorsConfiguration configuration = new CorsConfiguration();
 
                 // Configurar orígenes permitidos
-                configuration.setAllowedOrigins(ALLOWED_ORIGINS);
+                // Configurar orígenes permitidos (Patrón * para máxima compatibilidad)
+                configuration.setAllowedOriginPatterns(Arrays.asList("*"));
 
                 // Configurar métodos permitidos
                 configuration.setAllowedMethods(ALLOWED_METHODS);
