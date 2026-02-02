@@ -28,7 +28,7 @@ public class ClientController {
     @Operation(summary = "Obtener todos los clientes")
     public List<ClientDTO> getAllClients() {
         // Enforce fetching only users with ROLE 'CLIENT'
-        return userRepository.findByRole("CLIENT").stream()
+        return userRepository.findByRoleIgnoreCase("CLIENT").stream()
                 .map(ClientDTO::fromEntity)
                 .collect(Collectors.toList());
     }

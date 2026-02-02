@@ -85,7 +85,9 @@ public class UserController {
                 updatedUser.setPasswordHash(userDetails.getPasswordHash());
             }
 
-            updatedUser.setRole(userDetails.getRole());
+            if (userDetails.getRole() != null) {
+                updatedUser.setRole(userDetails.getRole().toUpperCase());
+            }
             updatedUser.setPhone(userDetails.getPhone());
             updatedUser.setStatus(userDetails.getStatus());
 

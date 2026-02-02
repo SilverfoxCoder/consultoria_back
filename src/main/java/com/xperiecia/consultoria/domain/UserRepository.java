@@ -27,6 +27,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     java.util.List<User> findByRole(String role);
 
+    java.util.List<User> findByRoleIgnoreCase(String role);
+
     long countByRole(String role);
 
     long countByRoleAndLastContactBetween(String role, LocalDateTime start, LocalDateTime end);
