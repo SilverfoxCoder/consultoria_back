@@ -36,35 +36,8 @@ import java.util.List;
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
-        // Obtener orígenes permitidos desde variable de entorno o usar defaults
-        private static final String ENV_ALLOWED_ORIGINS = System.getenv("CORS_ALLOWED_ORIGINS");
-
-        // Helper method to merge env vars with defaults
-        private static List<String> getAllowedOrigins() {
-                List<String> origins = new java.util.ArrayList<>();
-
-                // Add Env vars if present
-                if (ENV_ALLOWED_ORIGINS != null && !ENV_ALLOWED_ORIGINS.isEmpty()) {
-                        origins.addAll(Arrays.asList(ENV_ALLOWED_ORIGINS.split(",")));
-                }
-
-                // Add defaults (Localhost)
-                List<String> defaults = Arrays.asList(
-                                "http://xperiecia.com",
-                                "http://www.xperiecia.com",
-                                "http://xperiecia.com",
-                                "http://xperiecia.es",
-                                "http://www.xperiecia.es",
-                                "http://xperiecia.es");
-
-                origins.addAll(defaults);
-                return origins;
-        }
-
-        private static final List<String> ALLOWED_ORIGINS = getAllowedOrigins();
-
         private static final List<String> ALLOWED_METHODS = Arrays.asList(
-                        "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "TRACE", "CONNECT");
+                        "PUT", "GET", "HEAD", "POST", "DELETE", "OPTIONS");
 
         private static final List<String> ALLOWED_HEADERS = Arrays.asList(
                         "*");
@@ -84,7 +57,7 @@ public class CorsConfig implements WebMvcConfigurer {
         @Override
         public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**") // Aplicar a todos los endpoints
-                                .allowedOrigins(ALLOWED_ORIGINS.toArray(new String[0])) // Permitir orígenes explícitos
+                                .allowedOriginPatterns("*") // Permitir patrón universal (Reflected Origin)
                                 .allowedMethods(ALLOWED_METHODS.toArray(new String[0]))
                                 .allowedHeaders(ALLOWED_HEADERS.toArray(new String[0])) // Permitir todos los headers
                                 .exposedHeaders(EXPOSED_HEADERS.toArray(new String[0])) // Headers expuestos al frontend
@@ -93,7 +66,7 @@ public class CorsConfig implements WebMvcConfigurer {
 
                 // Configuración específica para WebSocket de notificaciones
                 registry.addMapping("/ws/**")
-                                .allowedOrigins(ALLOWED_ORIGINS.toArray(new String[0]))
+                                .allowedOriginPatterns("*")
                                 .allowedMethods("*")
                                 .allowedHeaders("*")
                                 .allowCredentials(true);
@@ -117,8 +90,9 @@ public class CorsConfig implements WebMvcConfigurer {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
 
-                // Configurar orígenes permitidos (Explícito para seguridad)
-                configuration.setAllowedOrigins(ALLOWED_ORIGINS);
+                // Configurar orígenes permitidos (Pattern * para simular comportamiento
+                // "ORIGIN")
+                configuration.setAllowedOriginPatterns(Arrays.asList("*"));
 
                 // Configurar métodos permitidos
                 configuration.setAllowedMethods(ALLOWED_METHODS);
