@@ -50,11 +50,11 @@ public class CorsConfig implements WebMvcConfigurer {
 
                 // Add defaults (Localhost)
                 List<String> defaults = Arrays.asList(
-                                "https://xperiecia.com",
-                                "https://www.xperiecia.com",
                                 "http://xperiecia.com",
-                                "https://xperiecia.es",
-                                "https://www.xperiecia.es",
+                                "http://www.xperiecia.com",
+                                "http://xperiecia.com",
+                                "http://xperiecia.es",
+                                "http://www.xperiecia.es",
                                 "http://xperiecia.es");
 
                 origins.addAll(defaults);
