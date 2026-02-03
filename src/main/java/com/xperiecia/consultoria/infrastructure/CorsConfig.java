@@ -40,7 +40,8 @@ public class CorsConfig implements WebMvcConfigurer {
                         "PUT", "GET", "HEAD", "POST", "DELETE", "OPTIONS");
 
         private static final List<String> ALLOWED_HEADERS = Arrays.asList(
-                        "*");
+                        "Authorization", "Cache-Control", "Content-Type", "Accept", "X-Requested-With", "Origin",
+                        "Access-Control-Request-Method", "Access-Control-Request-Headers");
 
         private static final List<String> EXPOSED_HEADERS = Arrays.asList(
                         "Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin");

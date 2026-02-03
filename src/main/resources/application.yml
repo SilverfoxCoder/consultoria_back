@@ -67,12 +67,7 @@ spring:
   # =====================================================
   # Necesario para que las cookies funcionen en Cross-Domain
   # Especialmente en moviles y Chrome Incognito
-  session:
-    cookie:
-      http-only: true
-      secure: true
-      same-site: none
-      max-age: 86400
+  # (Configuración principal movida a server.servlet.session más abajo)
 
 # =====================================================
 # PERFIL MYSQL (CONFIGURACIÓN ESPECÍFICA)
