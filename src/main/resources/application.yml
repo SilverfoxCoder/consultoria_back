@@ -118,6 +118,10 @@ server:
   # Puerto donde se ejecutará la aplicación
   port: ${PORT:8080}
   
+  # Importante para Back4App / Proxies: 
+  # Permite que Spring reconozca HTTPS a través de X-Forwarded-Proto
+  forward-headers-strategy: native
+  
   servlet:
     session:
       cookie:
