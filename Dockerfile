@@ -14,5 +14,5 @@ RUN mvn clean package -DskipTests
 FROM amazoncorretto:17
 VOLUME /tmp
 COPY --from=build /app/target/*.jar app.jar
-ENTRYPOINT ["java", "-Xms512m", "-Xmx768m", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "/app.jar"]
 EXPOSE 8080

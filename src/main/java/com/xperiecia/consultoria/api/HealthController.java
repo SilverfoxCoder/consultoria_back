@@ -63,4 +63,13 @@ public class HealthController {
             return ResponseEntity.status(503).body(errorHealth);
         }
     }
+
+    /**
+     * Endpoint raíz para verificación básica de disponibilidad
+     */
+    @GetMapping("/")
+    @Operation(summary = "Verificar disponibilidad básica")
+    public ResponseEntity<String> getRoot() {
+        return ResponseEntity.ok("System Online");
+    }
 }
