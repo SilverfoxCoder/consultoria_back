@@ -1,9 +1,11 @@
 package com.xperiecia.consultoria.application;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.annotation.PostConstruct;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -15,11 +17,19 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-    private final Path rootLocation = Paths.get("uploads");
+    @Value("${app.file.upload-dir}")
+    private String uploadDir;
 
-    public FileStorageService() {
+    private Path rootLocation;
+
+    @PostConstruct
+    public void init() {
         try {
+            this.rootLocation = Paths.get(uploadDir);
             Files.createDirectories(rootLocation);
+            System.out.println("=================================================================");
+            System.out.println("STORAGE LOCATION: " + this.rootLocation.toAbsolutePath());
+            System.out.println("=================================================================");
         } catch (IOException e) {
             throw new RuntimeException("Could not initialize storage location", e);
         }
