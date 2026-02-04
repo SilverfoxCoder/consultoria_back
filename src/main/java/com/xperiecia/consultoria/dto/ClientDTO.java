@@ -68,7 +68,11 @@ public class ClientDTO {
         user.setName(this.name);
         // user.setContactPerson(this.contactPerson); // User doesn't have this, uses
         // name
-        user.setEmail(this.email);
+        if (this.email != null && !this.email.trim().isEmpty()) {
+            user.setEmail(this.email);
+        } else {
+            user.setEmail(null);
+        }
         user.setPhone(this.phone);
         user.setCompany(this.company);
         user.setIndustry(this.industry);
