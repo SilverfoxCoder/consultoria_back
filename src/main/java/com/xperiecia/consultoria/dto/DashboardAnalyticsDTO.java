@@ -1,4 +1,4 @@
-package main.java.com.xperiecia.consultoria.dto;
+package com.xperiecia.consultoria.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
